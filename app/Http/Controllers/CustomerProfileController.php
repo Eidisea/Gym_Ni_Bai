@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CustomerProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 
 class CustomerProfileController extends Controller
 {
@@ -12,10 +13,10 @@ class CustomerProfileController extends Controller
     {
         Gate::authorize('viewAny', CustomerProfile::class);
 
-        $showArchived = $request->get('archived', false);
-        $search = $request->get('search');
-        $filter = $request->get('filter');
-        $sort = $request->get('sort', 'name_asc');
+        $showArchived = $request->input('archived', false);
+        $search = $request->input('search');
+        $filter = $request->input('filter');
+        $sort = $request->input('sort', 'name_asc');
 
         $query = CustomerProfile::with('user.role');
 
@@ -71,7 +72,13 @@ class CustomerProfileController extends Controller
         return view('customer_profiles.index', compact('profiles', 'showArchived', 'search', 'filter', 'sort'));
     }
 
-    public function show($id)
+    /**
+     * Display the specified customer profile.
+     *
+     * @param  int  $id
+     * @return \Illuminate\View\View
+     */
+    public function show(int $id)
     {
         Gate::authorize('viewAny', CustomerProfile::class);
 
@@ -123,7 +130,14 @@ class CustomerProfileController extends Controller
             ->with('success', 'Customer profile deleted.');
     }
 
-    public function archive(Request $request, $id)
+    /**
+     * Archive a customer profile.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function archive(Request $request, int $id)
     {
         Gate::authorize('admin-only');
 
@@ -135,7 +149,7 @@ class CustomerProfileController extends Controller
 
         $customerProfile->update([
             'archived_at' => now(),
-            'archived_by' => auth()->id(),
+            'archived_by' => Auth::id(),
             'archive_reason' => $validated['archive_reason'],
             'last_active_date' => now()->toDateString(),
         ]);
@@ -146,7 +160,13 @@ class CustomerProfileController extends Controller
             ->with('success', 'Customer profile archived successfully.');
     }
 
-    public function restore($id)
+    /**
+     * Restore an archived customer profile.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function restore(int $id)
     {
         Gate::authorize('admin-only');
 
@@ -165,7 +185,7 @@ class CustomerProfileController extends Controller
 
     public function dashboard()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $customerProfile = $user->customerProfile;
 
         $activeSubscription = $customerProfile->subscriptions()
@@ -205,13 +225,13 @@ class CustomerProfileController extends Controller
 
     public function editProfile()
     {
-        $customerProfile = auth()->user()->customerProfile;
+        $customerProfile = Auth::user()->customerProfile;
         return view('customer.profile', compact('customerProfile'));
     }
 
     public function updateProfile(Request $request)
     {
-        $customerProfile = auth()->user()->customerProfile;
+        $customerProfile = Auth::user()->customerProfile;
 
         $validated = $request->validate([
             'first_name' => ['required', 'string', 'max:50'],

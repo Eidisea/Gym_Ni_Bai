@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\FitnessClass;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 
 class FitnessClassController extends Controller
 {
@@ -12,8 +13,8 @@ class FitnessClassController extends Controller
     {
         Gate::authorize('viewAny', FitnessClass::class);
 
-        $showArchived = $request->get('archived', false);
-        $search = $request->get('search');
+        $showArchived = $request->input('archived', false);
+        $search = $request->input('search');
 
         $query = FitnessClass::withCount('schedules');
 
@@ -57,11 +58,11 @@ class FitnessClassController extends Controller
             ->with('success', 'Fitness class created successfully.');
     }
 
-    public function show($id)
+    public function show(FitnessClass $fitnessClass)
     {
         Gate::authorize('viewAny', FitnessClass::class);
 
-        $fitnessClass = FitnessClass::withTrashed()->findOrFail($id);
+        $fitnessClass = FitnessClass::withTrashed()->findOrFail($fitnessClass->id);
         $fitnessClass->load(['schedules.trainerProfile']);
 
         return view('fitness_classes.show', compact('fitnessClass'));
@@ -106,7 +107,14 @@ class FitnessClassController extends Controller
             ->with('success', 'Fitness class deleted successfully.');
     }
 
-    public function archive(Request $request, $id)
+    /**
+     * Archive a fitness class.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param int $id The ID of the fitness class to archive.
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function archive(Request $request, int $id)
     {
         Gate::authorize('admin-only');
 
@@ -118,7 +126,7 @@ class FitnessClassController extends Controller
 
         $fitnessClass->update([
             'archived_at' => now(),
-            'archived_by' => auth()->id(),
+            'archived_by' => Auth::id(),
             'archive_reason' => $validated['archive_reason'],
             'last_active_date' => now()->toDateString(),
         ]);
@@ -129,7 +137,13 @@ class FitnessClassController extends Controller
             ->with('success', 'Fitness class archived successfully.');
     }
 
-    public function restore($id)
+    /**
+     * Restore a soft-deleted fitness class.
+     *
+     * @param int $id The ID of the fitness class to restore.
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function restore(int $id)
     {
         Gate::authorize('admin-only');
 

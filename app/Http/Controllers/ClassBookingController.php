@@ -14,9 +14,9 @@ class ClassBookingController extends Controller
     {
         Gate::authorize('viewAny', ClassBooking::class);
 
-        $search = $request->get('search');
-        $filter = $request->get('filter');
-        $sort = $request->get('sort', 'date_desc');
+        $search = $request->input('search');
+        $filter = $request->input('filter');
+        $sort = $request->input('sort', 'date_desc');
 
         // Eager-load relationships with withTrashed() for archive-aware display
         $query = ClassBooking::with([

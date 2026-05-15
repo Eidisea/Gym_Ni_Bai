@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\MembershipPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 
 class MembershipPlanController extends Controller
 {
@@ -12,7 +13,7 @@ class MembershipPlanController extends Controller
     {
         Gate::authorize('viewAny', MembershipPlan::class);
 
-        $showArchived = $request->get('archived', false);
+        $showArchived = $request->input('archived', false);
 
         $query = MembershipPlan::withCount('subscriptions');
 
@@ -48,11 +49,11 @@ class MembershipPlanController extends Controller
             ->with('success', 'Membership plan created successfully.');
     }
 
-    public function show($id)
+    public function show(MembershipPlan $membershipPlan)
     {
         Gate::authorize('viewAny', MembershipPlan::class);
 
-        $membershipPlan = MembershipPlan::withTrashed()->findOrFail($id);
+        $membershipPlan = MembershipPlan::withTrashed()->findOrFail($membershipPlan->id);
         $membershipPlan->load(['subscriptions.customerProfile']);
 
         return view('membership_plans.show', compact('membershipPlan'));
@@ -97,7 +98,14 @@ class MembershipPlanController extends Controller
             ->with('success', 'Membership plan deleted successfully.');
     }
 
-    public function archive(Request $request, $id)
+    /**
+     * Archive the specified membership plan.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id  The ID of the membership plan to archive
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function archive(Request $request, int $id)
     {
         Gate::authorize('admin-only');
 
@@ -109,7 +117,7 @@ class MembershipPlanController extends Controller
 
         $membershipPlan->update([
             'archived_at' => now(),
-            'archived_by' => auth()->id(),
+            'archived_by' => Auth::id(),
             'archive_reason' => $validated['archive_reason'],
             'last_active_date' => now()->toDateString(),
         ]);
@@ -120,7 +128,13 @@ class MembershipPlanController extends Controller
             ->with('success', 'Membership plan archived successfully.');
     }
 
-    public function restore($id)
+    /**
+     * Restore the specified archived membership plan.
+     *
+     * @param  int  $id  The ID of the membership plan to restore
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function restore(int $id)
     {
         Gate::authorize('admin-only');
 

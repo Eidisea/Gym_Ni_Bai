@@ -14,9 +14,9 @@ class MembershipSubscriptionController extends Controller
     {
         Gate::authorize('viewAny', MembershipSubscription::class);
 
-        $search = $request->get('search');
-        $filter = $request->get('filter');
-        $sort = $request->get('sort', 'end_date_soonest');
+        $search = $request->input('search');
+        $filter = $request->input('filter');
+        $sort = $request->input('sort', 'end_date_soonest');
 
         // Eager-load relationships with withTrashed() for archive-aware display
         $query = MembershipSubscription::with([

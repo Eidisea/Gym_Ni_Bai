@@ -10,6 +10,7 @@ use App\Models\EwalletPayment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail; // ADDED for sending emails
 
 class CustomerBillingController extends Controller
 {
@@ -103,7 +104,7 @@ class CustomerBillingController extends Controller
 
             // Send membership activation email
             $subscription->load(['customerProfile', 'plan']);
-            \Mail::to(Auth::user()->email)->send(new \App\Mail\MembershipActivated($subscription));
+            Mail::to(Auth::user()->email)->send(new \App\Mail\MembershipActivated($subscription));
         });
 
         return redirect()->back()->with('success', 'Payment successful! Your membership is now active.');

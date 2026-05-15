@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\TrainerProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 
 class TrainerProfileController extends Controller
 {
@@ -12,10 +13,10 @@ class TrainerProfileController extends Controller
     {
         Gate::authorize('viewAny', TrainerProfile::class);
 
-        $showArchived = $request->get('archived', false);
-        $search = $request->get('search');
-        $filter = $request->get('filter');
-        $sort = $request->get('sort', 'name_asc');
+        $showArchived = $request->input('archived', false);
+        $search = $request->input('search');
+        $filter = $request->input('filter');
+        $sort = $request->input('sort', 'name_asc');
 
         $query = TrainerProfile::withCount('schedules');
 
@@ -86,11 +87,11 @@ class TrainerProfileController extends Controller
             ->with('success', 'Trainer profile created successfully.');
     }
 
-    public function show($id)
+    public function show(TrainerProfile $trainerProfile)
     {
         Gate::authorize('viewAny', TrainerProfile::class);
 
-        $trainerProfile = TrainerProfile::withTrashed()->findOrFail($id);
+        $trainerProfile = TrainerProfile::withTrashed()->findOrFail($trainerProfile->id);
         $trainerProfile->load(['schedules.fitnessClass']);
 
         return view('trainer_profiles.show', compact('trainerProfile'));
@@ -129,6 +130,13 @@ class TrainerProfileController extends Controller
             ->with('success', 'Trainer profile deleted.');
     }
 
+    /**
+     * Archive the specified trainer profile.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function archive(Request $request, $id)
     {
         Gate::authorize('admin-only');
@@ -141,7 +149,7 @@ class TrainerProfileController extends Controller
 
         $trainerProfile->update([
             'archived_at' => now(),
-            'archived_by' => auth()->id(),
+            'archived_by' => Auth::id(),
             'archive_reason' => $validated['archive_reason'],
             'last_active_date' => now()->toDateString(),
         ]);
@@ -152,6 +160,12 @@ class TrainerProfileController extends Controller
             ->with('success', 'Trainer profile archived successfully.');
     }
 
+    /**
+     * Restore the specified archived trainer profile.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function restore($id)
     {
         Gate::authorize('admin-only');

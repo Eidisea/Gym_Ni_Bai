@@ -8,6 +8,7 @@ use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class StaffProfileController extends Controller
 {
@@ -15,10 +16,10 @@ class StaffProfileController extends Controller
     {
         Gate::authorize('admin-only');
 
-        $showArchived = $request->get('archived', false);
-        $search = $request->get('search');
-        $filter = $request->get('filter');
-        $sort = $request->get('sort', 'name_asc');
+        $showArchived = $request->input('archived', false);
+        $search = $request->input('search');
+        $filter = $request->input('filter');
+        $sort = $request->input('sort', 'name_asc');
 
         $query = StaffProfile::with('user');
 
@@ -111,12 +112,21 @@ class StaffProfileController extends Controller
             ->with('success', 'Staff profile created successfully.');
     }
 
-    public function show($id)
+    public function show(int $id)
     {
         Gate::authorize('admin-only');
 
         $staffProfile = StaffProfile::withTrashed()->findOrFail($id);
-        $staffProfile->load(['user', 'cashPayments.transaction']);
+
+        // Check if related user exists and is not soft-deleted
+        $user = User::withTrashed()->find($staffProfile->user_id);
+        if (!$user) {
+            return redirect()->route('staff-profiles.index')
+                ->with('error', 'Related user account not found or has been deleted.');
+        }
+
+        $staffProfile->setRelation('user', $user);
+        $staffProfile->load(['cashPayments.transaction']);
 
         return view('staff_profiles.show', compact('staffProfile'));
     }
@@ -175,7 +185,14 @@ class StaffProfileController extends Controller
             ->with('success', 'Staff profile deleted successfully.');
     }
 
-    public function archive(Request $request, $id)
+    /**
+     * Archive the specified staff profile.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function archive(Request $request, int $id)
     {
         Gate::authorize('admin-only');
 
@@ -187,7 +204,7 @@ class StaffProfileController extends Controller
 
         $staffProfile->update([
             'archived_at' => now(),
-            'archived_by' => auth()->id(),
+            'archived_by' => Auth::id(),
             'archive_reason' => $validated['archive_reason'],
             'last_active_date' => now()->toDateString(),
         ]);
@@ -198,7 +215,13 @@ class StaffProfileController extends Controller
             ->with('success', 'Staff profile archived successfully.');
     }
 
-    public function restore($id)
+    /**
+     * Restore the specified archived staff profile.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function restore(int $id)
     {
         Gate::authorize('admin-only');
 

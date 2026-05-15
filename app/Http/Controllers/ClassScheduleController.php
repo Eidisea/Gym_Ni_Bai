@@ -7,6 +7,7 @@ use App\Models\FitnessClass;
 use App\Models\TrainerProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 
 class ClassScheduleController extends Controller
 {
@@ -14,7 +15,7 @@ class ClassScheduleController extends Controller
     {
         Gate::authorize('viewAny', ClassSchedule::class);
 
-        $search = $request->get('search');
+        $search = $request->input('search');
         $showArchived = $request->boolean('show_archived');
 
         // Eager-load relationships with withTrashed() for archive-aware display
@@ -81,6 +82,12 @@ class ClassScheduleController extends Controller
             ->with('success', 'Class schedule created successfully.');
     }
 
+    /**
+     * Display the specified class schedule.
+     *
+     * @param  int  $id
+     * @return \Illuminate\View\View
+     */
     public function show($id)
     {
         $classSchedule = ClassSchedule::withTrashed()->findOrFail($id);
@@ -160,7 +167,14 @@ class ClassScheduleController extends Controller
     /**
      * Archive a schedule with reason
      */
-    public function archive(Request $request, $id)
+    /**
+     * Archive a schedule with reason.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function archive(Request $request, int $id)
     {
         $classSchedule = ClassSchedule::findOrFail($id);
         
@@ -181,7 +195,7 @@ class ClassScheduleController extends Controller
 
         $classSchedule->update([
             'archived_at' => now(),
-            'archived_by' => auth()->id(),
+            'archived_by' => Auth::id(),
             'archive_reason' => $validated['archive_reason'],
             'last_active_date' => now()->toDateString(),
         ]);
@@ -195,7 +209,7 @@ class ClassScheduleController extends Controller
     /**
      * Cancel a schedule with reason (notifies customers with bookings)
      */
-    public function cancel(Request $request, $id)
+    public function cancel(Request $request, int $id)
     {
         $classSchedule = ClassSchedule::withTrashed()->findOrFail($id);
         
@@ -241,6 +255,12 @@ class ClassScheduleController extends Controller
 
     /**
      * Restore an archived schedule
+     */
+    /**
+     * Restore an archived class schedule.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function restore($id)
     {
