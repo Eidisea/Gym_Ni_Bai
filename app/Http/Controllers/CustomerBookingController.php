@@ -7,6 +7,9 @@ use App\Models\ClassBooking;
 use App\Models\MembershipSubscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB; // ADDED for Transactions
+use Illuminate\Support\Facades\Log; // ADDED for silent error logging
+use Illuminate\Support\Facades\Mail; // ADDED for sending emails
 
 class CustomerBookingController extends Controller
 {
@@ -51,27 +54,44 @@ class CustomerBookingController extends Controller
                 ->with('error', 'You need an active membership to book classes.');
         }
 
-        if ($schedule->available_slots <= 0) {
-            return redirect()->back()->with('error', 'This class is full.');
+        try {
+            // FIX 1: Database Transaction & Pessimistic Locking
+            // We wrap this in a transaction so if two users click at the exact same millisecond,
+            // the database queues them up safely instead of double-booking.
+            DB::transaction(function () use ($schedule, $customerId) {
+                
+                // Re-query the schedule to lock the row while we do the math
+                $lockedSchedule = ClassSchedule::where('schedule_id', $schedule->schedule_id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($lockedSchedule->available_slots <= 0) {
+                    throw new \Exception('This class is full.');
+                }
+
+                $existingBooking = ClassBooking::where('customer_id', $customerId)
+                    ->where('schedule_id', $lockedSchedule->schedule_id)
+                    ->where('status', 'confirmed')
+                    ->first();
+
+                if ($existingBooking) {
+                    throw new \Exception('You are already booked for this class.');
+                }
+
+                ClassBooking::create([
+                    'customer_id' => $customerId,
+                    'schedule_id' => $lockedSchedule->schedule_id,
+                    'status' => 'confirmed',
+                ]);
+
+                // Decrement available slots securely
+                $lockedSchedule->decrement('available_slots');
+            });
+
+        } catch (\Exception $e) {
+            // If the transaction throws an error (like "This class is full"), catch it and send it to the view
+            return redirect()->back()->with('error', $e->getMessage());
         }
-
-        $existingBooking = ClassBooking::where('customer_id', $customerId)
-            ->where('schedule_id', $schedule->schedule_id)
-            ->where('status', 'confirmed')
-            ->first();
-
-        if ($existingBooking) {
-            return redirect()->back()->with('error', 'You are already booked for this class.');
-        }
-
-        ClassBooking::create([
-            'customer_id' => $customerId,
-            'schedule_id' => $schedule->schedule_id,
-            'status' => 'confirmed',
-        ]);
-
-        // Decrement available slots
-        $schedule->decrement('available_slots');
 
         // Load the booking with relationships for email
         $booking = ClassBooking::with([
@@ -83,8 +103,14 @@ class CustomerBookingController extends Controller
           ->latest()
           ->first();
 
-        // Send booking confirmation email
-        \Mail::to(Auth::user()->email)->send(new \App\Mail\BookingConfirmed($booking));
+        // FIX 3: SMTP Crash Protection
+        // Wrap the email in a try-catch. If the university Wi-Fi blocks the SMTP port, 
+        // the user still gets their booking, and the system just quietly logs the email failure.
+        try {
+            Mail::to(Auth::user()->email)->send(new \App\Mail\BookingConfirmed($booking));
+        } catch (\Exception $e) {
+            Log::error('SMTP Email failed to send: ' . $e->getMessage());
+        }
 
         return redirect()->route('customer.dashboard')->with('success', 'Class booked successfully!');
     }
@@ -149,13 +175,16 @@ class CustomerBookingController extends Controller
             return redirect()->back()->with('error', 'Bookings cannot be cancelled within 2 hours of the class start time.');
         }
 
-        // Update status first and save — do NOT soft-delete so the record
-        // remains visible in the Past & Cancelled tab and re-booking works cleanly.
-        $booking->status = ClassBooking::STATUS_CANCELLED;
-        $booking->save();
+        // Use transaction here as well to ensure DB consistency when freeing up slots
+        DB::transaction(function () use ($booking) {
+            // Update status first and save — do NOT soft-delete so the record
+            // remains visible in the Past & Cancelled tab and re-booking works cleanly.
+            $booking->status = ClassBooking::STATUS_CANCELLED;
+            $booking->save();
 
-        // Give the slot back
-        $booking->schedule->increment('available_slots');
+            // Give the slot back
+            $booking->schedule->increment('available_slots');
+        });
 
         // Load relationships needed for the cancellation email
         $booking->load([
@@ -164,7 +193,12 @@ class CustomerBookingController extends Controller
             'schedule.trainerProfile',
         ]);
 
-        \Mail::to(Auth::user()->email)->send(new \App\Mail\ClassCancelled($booking));
+        // FIX 3: SMTP Crash Protection (for cancellations)
+        try {
+            Mail::to(Auth::user()->email)->send(new \App\Mail\ClassCancelled($booking));
+        } catch (\Exception $e) {
+            Log::error('SMTP Cancellation Email failed to send: ' . $e->getMessage());
+        }
 
         return redirect()->back()->with('success', 'Booking successfully cancelled.');
     }

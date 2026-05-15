@@ -10,6 +10,8 @@ use App\Models\StaffProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log; // ADDED: For silent error logging
+use Illuminate\Support\Facades\Auth;
 
 class PaymentTransactionController extends Controller
 {
@@ -17,9 +19,9 @@ class PaymentTransactionController extends Controller
     {
         Gate::authorize('viewAny', PaymentTransaction::class);
 
-        $search = $request->get('search');
-        $filter = $request->get('filter');
-        $sort = $request->get('sort', 'newest');
+        $search = $request->input('search');
+        $filter = $request->input('filter');
+        $sort = $request->input('sort', 'newest');
 
         // Eager-load relationships with withTrashed() for archive-aware display
         $query = PaymentTransaction::with([
@@ -156,44 +158,53 @@ class PaymentTransactionController extends Controller
             'provider' => ['required_if:payment_method,ewallet', 'in:gcash,paymaya,grabpay,paypal'],
             'reference_number' => ['required_if:payment_method,ewallet', 'string', 'max:100'],
             'account_identifier' => ['nullable', 'string', 'max:100'],
-        ]);
+        ]); 
 
-        DB::transaction(function () use ($validated) {
-            // Create main transaction
-            $validated['transaction_date'] = now();
-            $transaction = PaymentTransaction::create($validated);
+        try {
+            DB::transaction(function () use ($validated) {
+                // Create main transaction
+                $validated['transaction_date'] = now();
+                $transaction = PaymentTransaction::create($validated);
 
-            // Create payment method specific record
-            switch ($validated['payment_method']) {
-                case 'cash':
-                    $transaction->cashPayment()->create([
-                        'staff_id' => $validated['staff_id'],
-                        'amount_received' => $validated['amount_received'],
-                        'change_given' => $validated['change_given'] ?? 0,
-                    ]);
-                    break;
+                // Create payment method specific record
+                switch ($validated['payment_method']) {
+                    case 'cash':
+                        $transaction->cashPayment()->create([
+                            'staff_id' => $validated['staff_id'],
+                            'amount_received' => $validated['amount_received'],
+                            'change_given' => $validated['change_given'] ?? 0,
+                        ]);
+                        break;
 
-                case 'card':
-                    $transaction->cardPayment()->create([
-                        'card_last_four' => $validated['card_last_four'],
-                        'card_type' => $validated['card_type'],
-                        'authorization_code' => $validated['authorization_code'],
-                        'processor_reference' => $validated['processor_reference'],
-                    ]);
-                    break;
+                    case 'card':
+                        $transaction->cardPayment()->create([
+                            'card_last_four' => $validated['card_last_four'],
+                            'card_type' => $validated['card_type'],
+                            'authorization_code' => $validated['authorization_code'],
+                            'processor_reference' => $validated['processor_reference'] ?? null,
+                        ]);
+                        break;
 
-                case 'ewallet':
-                    $transaction->ewalletPayment()->create([
-                        'provider' => $validated['provider'],
-                        'reference_number' => $validated['reference_number'],
-                        'account_identifier' => $validated['account_identifier'],
-                    ]);
-                    break;
-            }
-        });
+                    case 'ewallet':
+                        $transaction->ewalletPayment()->create([
+                            'provider' => $validated['provider'],
+                            'reference_number' => $validated['reference_number'],
+                            'account_identifier' => $validated['account_identifier'] ?? null,
+                        ]);
+                        break;
+                }
+            });
 
-        return redirect()->route('payment-transactions.index')
-            ->with('success', 'Payment transaction created successfully.');
+            return redirect()->route('payment-transactions.index')
+                ->with('success', 'Payment transaction created successfully.');
+
+        } catch (\Exception $e) {
+            // FIX: If anything fails, log it and return the user safely instead of crashing
+            Log::error('Payment Transaction Failed: ' . $e->getMessage());
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Payment failed to process due to a system error. Please try again.');
+        }
     }
 
     public function show(PaymentTransaction $paymentTransaction)
@@ -253,7 +264,7 @@ class PaymentTransactionController extends Controller
         // Void the transaction instead of deleting it
         $paymentTransaction->update([
             'status' => 'voided',
-            'notes' => ($paymentTransaction->notes ? $paymentTransaction->notes . ' | ' : '') . 'Voided on ' . now()->format('Y-m-d H:i:s') . ' by ' . auth()->user()->name,
+            'notes' => ($paymentTransaction->notes ? $paymentTransaction->notes . ' | ' : '') . 'Voided on ' . now()->format('Y-m-d H:i:s') . ' by ' . Auth::user()->email,
         ]);
 
         return redirect()->route('payment-transactions.index')
@@ -287,7 +298,8 @@ class PaymentTransactionController extends Controller
             'change_given' => ['nullable', 'numeric', 'min:0'],
         ]);
 
-        $staffProfile = auth()->user()->staffProfile;
+        // Use the Auth facade to satisfy static analyzers and avoid undefined method errors
+        $staffProfile = Auth::user()?->staffProfile;
         
         if (!$staffProfile) {
             return redirect()->back()
@@ -295,25 +307,34 @@ class PaymentTransactionController extends Controller
                 ->withInput();
         }
 
-        DB::transaction(function () use ($validated, $staffProfile) {
-            $transaction = PaymentTransaction::create([
-                'customer_id' => $validated['customer_id'],
-                'subscription_id' => $validated['subscription_id'],
-                'booking_id' => null,
-                'amount' => $validated['amount'],
-                'payment_method' => 'cash',
-                'status' => 'completed',
-                'transaction_date' => now(),
-            ]);
+        try {
+            DB::transaction(function () use ($validated, $staffProfile) {
+                $transaction = PaymentTransaction::create([
+                    'customer_id' => $validated['customer_id'],
+                    'subscription_id' => $validated['subscription_id'],
+                    'booking_id' => null,
+                    'amount' => $validated['amount'],
+                    'payment_method' => 'cash',
+                    'status' => 'completed',
+                    'transaction_date' => now(),
+                ]);
 
-            $transaction->cashPayment()->create([
-                'staff_id' => $staffProfile->staff_id,
-                'amount_received' => $validated['amount_received'],
-                'change_given' => $validated['change_given'] ?? 0,
-            ]);
-        });
+                $transaction->cashPayment()->create([
+                    'staff_id' => $staffProfile->staff_id,
+                    'amount_received' => $validated['amount_received'],
+                    'change_given' => $validated['change_given'] ?? 0,
+                ]);
+            });
 
-        return redirect()->route('payment-transactions.index')
-            ->with('success', 'Cash payment processed successfully.');
+            return redirect()->route('payment-transactions.index')
+                ->with('success', 'Cash payment processed successfully.');
+
+        } catch (\Exception $e) {
+            // FIX: Prevent crashes on rapid/failed cash processing
+            Log::error('Cash Processing Failed: ' . $e->getMessage());
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Cash payment failed to process due to a system error. Please try again.');
+        }
     }
 }
