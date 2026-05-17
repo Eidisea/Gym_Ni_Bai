@@ -45,7 +45,7 @@ class MembershipPlanController extends Controller
 
         MembershipPlan::create($validated);
 
-        return redirect()->route('membership-plans.index')
+        return redirect()->route('management.membership-plans.index')
             ->with('success', 'Membership plan created successfully.');
     }
 
@@ -53,7 +53,7 @@ class MembershipPlanController extends Controller
     {
         Gate::authorize('viewAny', MembershipPlan::class);
 
-        $membershipPlan = MembershipPlan::withTrashed()->findOrFail($membershipPlan->id);
+        $membershipPlan = MembershipPlan::withTrashed()->findOrFail($membershipPlan->plan_id);
         $membershipPlan->load(['subscriptions.customerProfile']);
 
         return view('membership_plans.show', compact('membershipPlan'));
@@ -78,7 +78,7 @@ class MembershipPlanController extends Controller
 
         $membershipPlan->update($validated);
 
-        return redirect()->route('membership-plans.index')
+        return redirect()->route('management.membership-plans.index')
             ->with('success', 'Membership plan updated successfully.');
     }
 
@@ -88,13 +88,13 @@ class MembershipPlanController extends Controller
 
         // Guard: DB enforces ON DELETE RESTRICT, but give a friendly error
         if ($membershipPlan->subscriptions()->exists()) {
-            return redirect()->route('membership-plans.index')
+            return redirect()->route('management.membership-plans.index')
                 ->with('error', 'Cannot delete a plan that has active subscriptions.');
         }
 
         $membershipPlan->delete();
 
-        return redirect()->route('membership-plans.index')
+        return redirect()->route('management.membership-plans.index')
             ->with('success', 'Membership plan deleted successfully.');
     }
 
@@ -124,7 +124,7 @@ class MembershipPlanController extends Controller
 
         $membershipPlan->delete();
 
-        return redirect()->route('membership-plans.index')
+        return redirect()->route('management.membership-plans.index')
             ->with('success', 'Membership plan archived successfully.');
     }
 
@@ -147,7 +147,7 @@ class MembershipPlanController extends Controller
             'archive_reason' => null,
         ]);
 
-        return redirect()->route('membership-plans.index')
+        return redirect()->route('management.membership-plans.index')
             ->with('success', 'Membership plan restored successfully.');
     }
 }

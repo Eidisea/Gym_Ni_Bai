@@ -18,7 +18,7 @@ class ReportController extends Controller
             DB::raw('MONTH(transaction_date) as month'),
             DB::raw('SUM(amount) as total_revenue')
         )
-        ->where('status', 'Completed')
+        ->where('status', 'completed')
         ->whereYear('transaction_date', Carbon::now()->year)
         ->groupBy(DB::raw('MONTH(transaction_date)'))
         ->orderBy('month')
@@ -41,7 +41,7 @@ class ReportController extends Controller
         ->leftJoin('class_schedules', 'fitness_classes.class_id', '=', 'class_schedules.class_id')
         ->leftJoin('class_bookings', function($join) {
             $join->on('class_schedules.schedule_id', '=', 'class_bookings.schedule_id')
-                 ->where('class_bookings.status', '=', 'Confirmed');
+                 ->where('class_bookings.status', '=', 'confirmed');
         })
         ->whereNull('fitness_classes.archived_at')
         ->groupBy('fitness_classes.class_id', 'fitness_classes.class_name', 'fitness_classes.max_participants')
@@ -49,16 +49,16 @@ class ReportController extends Controller
         ->get();
 
         // Summary Statistics
-        $totalRevenue = PaymentTransaction::where('status', 'Completed')
+        $totalRevenue = PaymentTransaction::where('status', 'completed')
             ->whereYear('transaction_date', Carbon::now()->year)
             ->sum('amount');
 
-        $totalBookings = ClassBooking::where('status', 'Confirmed')
+        $totalBookings = ClassBooking::where('status', 'confirmed')
             ->whereYear('created_at', Carbon::now()->year)
             ->count();
 
         $activeMembers = DB::table('membership_subscriptions')
-            ->where('status', 'Active')
+            ->where('status', 'active')
             ->count();
 
         return view('management.reports.index', compact(

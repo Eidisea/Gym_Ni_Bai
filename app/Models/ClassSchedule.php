@@ -28,6 +28,7 @@ class ClassSchedule extends Model
         'archived_at',
         'archived_by',
         'archive_reason',
+        'cancellation_reason',
         'last_active_date',
     ];
 

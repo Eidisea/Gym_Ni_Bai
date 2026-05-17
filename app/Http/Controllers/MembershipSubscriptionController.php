@@ -104,7 +104,7 @@ class MembershipSubscriptionController extends Controller
 
         MembershipSubscription::create($validated);
 
-        return redirect()->route('membership-subscriptions.index')
+        return redirect()->route('management.membership-subscriptions.index')
             ->with('success', 'Membership subscription created successfully.');
     }
 
@@ -150,7 +150,7 @@ class MembershipSubscriptionController extends Controller
 
         $membershipSubscription->update($validated);
 
-        return redirect()->route('membership-subscriptions.show', $membershipSubscription)
+        return redirect()->route('management.membership-subscriptions.show', $membershipSubscription)
             ->with('success', 'Membership subscription updated successfully.');
     }
 
@@ -158,7 +158,7 @@ class MembershipSubscriptionController extends Controller
     {
         // Subscriptions should not be deleted for business history and analytics
         // Use status changes instead (active → cancelled)
-        return redirect()->route('membership-subscriptions.index')
+        return redirect()->route('management.membership-subscriptions.index')
             ->with('error', 'Subscriptions cannot be deleted. Use "Cancel Subscription" to change status instead.');
     }
 
@@ -170,7 +170,7 @@ class MembershipSubscriptionController extends Controller
         Gate::authorize('update', $membershipSubscription);
 
         if ($membershipSubscription->status === 'cancelled') {
-            return redirect()->route('membership-subscriptions.show', $membershipSubscription)
+            return redirect()->route('management.membership-subscriptions.show', $membershipSubscription)
                 ->with('error', 'Subscription is already cancelled.');
         }
 
@@ -178,7 +178,7 @@ class MembershipSubscriptionController extends Controller
             'status' => 'cancelled',
         ]);
 
-        return redirect()->route('membership-subscriptions.show', $membershipSubscription)
+        return redirect()->route('management.membership-subscriptions.show', $membershipSubscription)
             ->with('success', 'Subscription cancelled successfully.');
     }
 }

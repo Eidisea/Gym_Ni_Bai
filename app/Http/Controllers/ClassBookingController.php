@@ -130,7 +130,7 @@ class ClassBookingController extends Controller
         $validated['booked_at'] = now();
         ClassBooking::create($validated);
 
-        return redirect()->route('class-bookings.index')
+        return redirect()->route('management.class-bookings.index')
             ->with('success', 'Class booking created successfully.');
     }
 
@@ -179,7 +179,7 @@ class ClassBookingController extends Controller
 
         $classBooking->update($validated);
 
-        return redirect()->route('class-bookings.show', $classBooking)
+        return redirect()->route('management.class-bookings.show', $classBooking)
             ->with('success', 'Class booking updated successfully.');
     }
 
@@ -187,7 +187,7 @@ class ClassBookingController extends Controller
     {
         // Bookings should not be deleted for attendance tracking and analytics
         // Use status changes instead (confirmed → cancelled)
-        return redirect()->route('class-bookings.index')
+        return redirect()->route('management.class-bookings.index')
             ->with('error', 'Bookings cannot be deleted. Use "Cancel Booking" to change status instead.');
     }
 
@@ -199,12 +199,12 @@ class ClassBookingController extends Controller
         Gate::authorize('update', $classBooking);
 
         if ($classBooking->status === 'cancelled') {
-            return redirect()->route('class-bookings.show', $classBooking)
+            return redirect()->route('management.class-bookings.show', $classBooking)
                 ->with('error', 'Booking is already cancelled.');
         }
 
         if ($classBooking->status === 'completed') {
-            return redirect()->route('class-bookings.show', $classBooking)
+            return redirect()->route('management.class-bookings.show', $classBooking)
                 ->with('error', 'Cannot cancel a completed booking.');
         }
 
@@ -212,7 +212,21 @@ class ClassBookingController extends Controller
             'status' => 'cancelled',
         ]);
 
-        return redirect()->route('class-bookings.show', $classBooking)
+        return redirect()->route('management.class-bookings.show', $classBooking)
             ->with('success', 'Booking cancelled successfully.');
+    }
+
+    /**
+     * Restore a soft-deleted booking record.
+     */
+    public function restore(int $id)
+    {
+        Gate::authorize('update', ClassBooking::class);
+
+        $classBooking = ClassBooking::onlyTrashed()->findOrFail($id);
+        $classBooking->restore();
+
+        return redirect()->route('management.class-bookings.show', $id)
+            ->with('success', 'Booking restored successfully.');
     }
 }

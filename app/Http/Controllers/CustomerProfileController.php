@@ -114,7 +114,7 @@ class CustomerProfileController extends Controller
 
         $customerProfile->update($validated);
 
-        return redirect()->route('customer-profiles.show', $customerProfile)
+        return redirect()->route('management.customer-profiles.show', $customerProfile)
             ->with('success', 'Customer profile updated successfully.');
     }
 
@@ -126,7 +126,7 @@ class CustomerProfileController extends Controller
         // But we delete the user, which cascades to profile — or delete profile only
         $customerProfile->delete();
 
-        return redirect()->route('customer-profiles.index')
+        return redirect()->route('management.customer-profiles.index')
             ->with('success', 'Customer profile deleted.');
     }
 
@@ -156,7 +156,7 @@ class CustomerProfileController extends Controller
 
         $customerProfile->delete();
 
-        return redirect()->route('customer-profiles.index')
+        return redirect()->route('management.customer-profiles.index')
             ->with('success', 'Customer profile archived successfully.');
     }
 
@@ -179,7 +179,7 @@ class CustomerProfileController extends Controller
             'archive_reason' => null,
         ]);
 
-        return redirect()->route('customer-profiles.index')
+        return redirect()->route('management.customer-profiles.index')
             ->with('success', 'Customer profile restored successfully.');
     }
 

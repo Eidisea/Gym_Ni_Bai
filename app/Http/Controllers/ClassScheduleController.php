@@ -150,7 +150,7 @@ class ClassScheduleController extends Controller
 
         // Check for active bookings (confirmed, attended, or no-show)
         $activeBookings = $classSchedule->bookings()
-            ->whereIn('status', ['confirmed', 'attended', 'no-show'])
+            ->whereIn('status', ['confirmed', 'attended', 'no_show'])
             ->exists();
 
         if ($activeBookings) {
@@ -182,7 +182,7 @@ class ClassScheduleController extends Controller
 
         // Check for active bookings (confirmed, attended, or no-show)
         $activeBookings = $classSchedule->bookings()
-            ->whereIn('status', ['confirmed', 'attended', 'no-show'])
+            ->whereIn('status', ['confirmed', 'attended', 'no_show'])
             ->exists();
 
         if ($activeBookings) {
@@ -237,10 +237,9 @@ class ClassScheduleController extends Controller
             $booking->update(['status' => 'cancelled']);
         }
 
-        // Store cancellation reason in location field (temporary solution)
-        // TODO: Add proper cancellation_reason field to class_schedules table
+        // Store cancellation reason in the dedicated column
         $classSchedule->update([
-            'location' => 'CANCELLED: ' . $validated['cancellation_reason'],
+            'cancellation_reason' => $validated['cancellation_reason'],
         ]);
 
         // TODO: Send email notifications to customers

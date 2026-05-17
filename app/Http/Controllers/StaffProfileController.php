@@ -108,7 +108,7 @@ class StaffProfileController extends Controller
             'department' => $validated['department'],
         ]);
 
-        return redirect()->route('staff-profiles.index')
+        return redirect()->route('management.staff-profiles.index')
             ->with('success', 'Staff profile created successfully.');
     }
 
@@ -121,7 +121,7 @@ class StaffProfileController extends Controller
         // Check if related user exists and is not soft-deleted
         $user = User::withTrashed()->find($staffProfile->user_id);
         if (!$user) {
-            return redirect()->route('staff-profiles.index')
+            return redirect()->route('management.staff-profiles.index')
                 ->with('error', 'Related user account not found or has been deleted.');
         }
 
@@ -163,7 +163,7 @@ class StaffProfileController extends Controller
             'department' => $validated['department'],
         ]);
 
-        return redirect()->route('staff-profiles.show', $staffProfile)
+        return redirect()->route('management.staff-profiles.show', $staffProfile)
             ->with('success', 'Staff profile updated successfully.');
     }
 
@@ -173,7 +173,7 @@ class StaffProfileController extends Controller
 
         // Check if staff has processed cash payments
         if ($staffProfile->cashPayments()->exists()) {
-            return redirect()->route('staff-profiles.index')
+            return redirect()->route('management.staff-profiles.index')
                 ->with('error', 'Cannot delete staff member with payment transaction history.');
         }
 
@@ -181,7 +181,7 @@ class StaffProfileController extends Controller
         $staffProfile->delete();
         $user->delete();
 
-        return redirect()->route('staff-profiles.index')
+        return redirect()->route('management.staff-profiles.index')
             ->with('success', 'Staff profile deleted successfully.');
     }
 
@@ -211,7 +211,7 @@ class StaffProfileController extends Controller
 
         $staffProfile->delete();
 
-        return redirect()->route('staff-profiles.index')
+        return redirect()->route('management.staff-profiles.index')
             ->with('success', 'Staff profile archived successfully.');
     }
 
@@ -234,7 +234,7 @@ class StaffProfileController extends Controller
             'archive_reason' => null,
         ]);
 
-        return redirect()->route('staff-profiles.index')
+        return redirect()->route('management.staff-profiles.index')
             ->with('success', 'Staff profile restored successfully.');
     }
 }

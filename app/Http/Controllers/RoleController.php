@@ -40,7 +40,7 @@ class RoleController extends Controller
 
         Role::create($validated);
 
-        return redirect()->route('roles.index')
+        return redirect()->route('management.roles.index')
             ->with('success', 'Role created successfully.');
     }
 
@@ -70,7 +70,7 @@ class RoleController extends Controller
 
         $role->update($validated);
 
-        return redirect()->route('roles.index')
+        return redirect()->route('management.roles.index')
             ->with('success', 'Role updated successfully.');
     }
 
@@ -81,19 +81,19 @@ class RoleController extends Controller
         // Prevent deletion of core system roles
         $coreRoles = [Role::ADMIN, Role::STAFF, Role::CUSTOMER];
         if (in_array($role->role_name, $coreRoles)) {
-            return redirect()->route('roles.index')
+            return redirect()->route('management.roles.index')
                 ->with('error', 'Cannot delete core system roles (Admin, Staff, Customer).');
         }
 
         // Prevent deleting a role that has users attached (DB also enforces ON DELETE RESTRICT)
         if ($role->users()->exists()) {
-            return redirect()->route('roles.index')
+            return redirect()->route('management.roles.index')
                 ->with('error', 'Cannot delete a role that is assigned to users.');
         }
 
         $role->delete();
 
-        return redirect()->route('roles.index')
+        return redirect()->route('management.roles.index')
             ->with('success', 'Role deleted successfully.');
     }
 }

@@ -195,7 +195,7 @@ class PaymentTransactionController extends Controller
                 }
             });
 
-            return redirect()->route('payment-transactions.index')
+            return redirect()->route('management.payment-transactions.index')
                 ->with('success', 'Payment transaction created successfully.');
 
         } catch (\Exception $e) {
@@ -253,7 +253,7 @@ class PaymentTransactionController extends Controller
 
         $paymentTransaction->update($validated);
 
-        return redirect()->route('payment-transactions.show', $paymentTransaction)
+        return redirect()->route('management.payment-transactions.show', $paymentTransaction)
             ->with('success', 'Payment transaction updated successfully.');
     }
 
@@ -267,7 +267,7 @@ class PaymentTransactionController extends Controller
             'notes' => ($paymentTransaction->notes ? $paymentTransaction->notes . ' | ' : '') . 'Voided on ' . now()->format('Y-m-d H:i:s') . ' by ' . Auth::user()->email,
         ]);
 
-        return redirect()->route('payment-transactions.index')
+        return redirect()->route('management.payment-transactions.index')
             ->with('success', 'Payment transaction voided successfully.');
     }
 
@@ -326,7 +326,7 @@ class PaymentTransactionController extends Controller
                 ]);
             });
 
-            return redirect()->route('payment-transactions.index')
+            return redirect()->route('management.payment-transactions.index')
                 ->with('success', 'Cash payment processed successfully.');
 
         } catch (\Exception $e) {

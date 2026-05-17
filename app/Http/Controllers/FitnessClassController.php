@@ -54,7 +54,7 @@ class FitnessClassController extends Controller
 
         FitnessClass::create($validated);
 
-        return redirect()->route('fitness-classes.index')
+        return redirect()->route('management.fitness-classes.index')
             ->with('success', 'Fitness class created successfully.');
     }
 
@@ -62,7 +62,7 @@ class FitnessClassController extends Controller
     {
         Gate::authorize('viewAny', FitnessClass::class);
 
-        $fitnessClass = FitnessClass::withTrashed()->findOrFail($fitnessClass->id);
+        $fitnessClass = FitnessClass::withTrashed()->findOrFail($fitnessClass->class_id);
         $fitnessClass->load(['schedules.trainerProfile']);
 
         return view('fitness_classes.show', compact('fitnessClass'));
@@ -87,7 +87,7 @@ class FitnessClassController extends Controller
 
         $fitnessClass->update($validated);
 
-        return redirect()->route('fitness-classes.index')
+        return redirect()->route('management.fitness-classes.index')
             ->with('success', 'Fitness class updated successfully.');
     }
 
@@ -97,13 +97,13 @@ class FitnessClassController extends Controller
 
         // Guard: DB enforces ON DELETE RESTRICT on class_schedules
         if ($fitnessClass->schedules()->exists()) {
-            return redirect()->route('fitness-classes.index')
+            return redirect()->route('management.fitness-classes.index')
                 ->with('error', 'Cannot delete a class that has existing schedules.');
         }
 
         $fitnessClass->delete();
 
-        return redirect()->route('fitness-classes.index')
+        return redirect()->route('management.fitness-classes.index')
             ->with('success', 'Fitness class deleted successfully.');
     }
 
@@ -133,7 +133,7 @@ class FitnessClassController extends Controller
 
         $fitnessClass->delete();
 
-        return redirect()->route('fitness-classes.index')
+        return redirect()->route('management.fitness-classes.index')
             ->with('success', 'Fitness class archived successfully.');
     }
 
@@ -156,7 +156,7 @@ class FitnessClassController extends Controller
             'archive_reason' => null,
         ]);
 
-        return redirect()->route('fitness-classes.index')
+        return redirect()->route('management.fitness-classes.index')
             ->with('success', 'Fitness class restored successfully.');
     }
 }
