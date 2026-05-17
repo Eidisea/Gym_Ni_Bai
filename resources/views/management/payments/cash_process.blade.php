@@ -27,7 +27,7 @@
     <div class="bg-slate-800 border border-slate-700 rounded p-4">
         <h2 class="text-sm font-semibold text-gray-100 mb-4">Cash Payment Processing</h2>
 
-        <form method="POST" action="{{ route('management.payments.cash-process.store') }}">
+        <form method="POST" action="{{ route('management.payment-transactions.cash-process.store') }}">
             @csrf
 
             <!-- Customer Selection -->
@@ -85,15 +85,15 @@
 
             <!-- Amount Tendered -->
             <div class="mb-3">
-                <label for="amount_tendered" class="block text-xs font-medium text-gray-300 mb-1">Amount Tendered</label>
+                <label for="amount_received" class="block text-xs font-medium text-gray-300 mb-1">Amount Tendered</label>
                 <div class="relative">
                     <span class="absolute left-2 top-1.5 text-sm text-gray-400">₱</span>
-                    <input type="number" id="amount_tendered" name="amount_tendered" step="0.01" min="0" required
-                           value="{{ old('amount_tendered') }}"
+                    <input type="number" id="amount_received" name="amount_received" step="0.01" min="0" required
+                           value="{{ old('amount_received') }}"
                            class="w-full pl-6 pr-2 py-1.5 text-sm bg-slate-700 border border-slate-600 rounded text-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-500
-                                  @error('amount_tendered') border-red-500 @enderror">
+                                  @error('amount_received') border-red-500 @enderror">
                 </div>
-                @error('amount_tendered')
+                @error('amount_received')
                     <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
                 @enderror
             </div>
@@ -137,7 +137,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const subscriptionSelect = document.getElementById('subscription_id');
     const amountInput = document.getElementById('amount');
-    const tenderedInput = document.getElementById('amount_tendered');
+    const tenderedInput = document.getElementById('amount_received');
     const changeDisplay = document.getElementById('change_display');
 
     // Auto-fill amount when subscription is selected
