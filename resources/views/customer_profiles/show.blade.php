@@ -59,7 +59,7 @@
     
     <div class="flex items-center space-x-3">
         @can('update', $customerProfile)
-        <a href="{{ route('customer-profiles.edit', $customerProfile) }}" 
+        <a href="{{ route('management.customer-profiles.edit', $customerProfile) }}" 
            class="inline-flex items-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-lg transition-colors">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -69,7 +69,7 @@
         @endcan
         
         @can('delete', $customerProfile)
-        <form method="POST" action="{{ route('customer-profiles.destroy', $customerProfile) }}" 
+        <form method="POST" action="{{ route('management.customer-profiles.destroy', $customerProfile) }}" 
               onsubmit="return confirm('Are you sure you want to delete this customer profile? This action cannot be undone.')" class="inline">
             @csrf
             @method('DELETE')
@@ -154,7 +154,7 @@
     <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-100">Active Memberships</h3>
-            <a href="{{ route('membership-subscriptions.create') }}?customer_id={{ $customerProfile->customer_id }}" 
+            <a href="{{ route('management.membership-subscriptions.create') }}?customer_id={{ $customerProfile->customer_id }}" 
                class="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">
                 Add Membership →
             </a>
@@ -196,7 +196,7 @@
     <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-100">Recent Bookings</h3>
-            <a href="{{ route('class-bookings.create') }}?customer_id={{ $customerProfile->customer_id }}" 
+            <a href="{{ route('management.class-bookings.create') }}?customer_id={{ $customerProfile->customer_id }}" 
                class="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">
                 Book Class →
             </a>

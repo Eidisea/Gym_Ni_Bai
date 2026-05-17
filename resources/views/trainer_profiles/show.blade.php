@@ -17,7 +17,7 @@
                 <svg class="w-4 h-4 text-gray-400 mx-1" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                 </svg>
-                <a href="{{ route('trainer-profiles.index') }}" class="text-gray-400 hover:text-gray-100 transition-colors">
+                <a href="{{ route('management.trainer-profiles.index') }}" class="text-gray-400 hover:text-gray-100 transition-colors">
                     Trainer Profiles
                 </a>
             </div>
@@ -52,7 +52,7 @@
     
     <div class="flex items-center space-x-3">
         @can('update', $trainerProfile)
-        <a href="{{ route('trainer-profiles.edit', $trainerProfile) }}" 
+        <a href="{{ route('management.trainer-profiles.edit', $trainerProfile) }}" 
            class="inline-flex items-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-lg transition-colors">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -110,7 +110,7 @@
 <script>
 function openArchiveModal(trainerId, trainerName) {
     document.getElementById('trainerName').textContent = trainerName;
-    document.getElementById('archiveForm').action = `/trainer-profiles/${trainerId}/archive`;
+    document.getElementById('archiveForm').action = '/management/trainer-profiles/' + trainerId + '/archive';
     document.getElementById('archiveModal').classList.remove('hidden');
 }
 
@@ -177,7 +177,7 @@ function closeArchiveModal() {
 <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
     <div class="flex items-center justify-between mb-6">
         <h3 class="text-lg font-semibold text-gray-100">Class Schedules</h3>
-        <a href="{{ route('class-schedules.create') }}?trainer_id={{ $trainerProfile->trainer_id }}" 
+        <a href="{{ route('management.class-schedules.create') }}?trainer_id={{ $trainerProfile->trainer_id }}" 
            class="inline-flex items-center px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -234,7 +234,7 @@ function closeArchiveModal() {
                     </td>
                     <td class="py-3 px-4 text-sm text-gray-300">
                         <div class="flex items-center space-x-2">
-                            <a href="{{ route('class-schedules.show', $schedule) }}" 
+                            <a href="{{ route('management.class-schedules.show', $schedule) }}" 
                                class="text-gray-400 hover:text-indigo-400 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -242,7 +242,7 @@ function closeArchiveModal() {
                                 </svg>
                             </a>
                             @can('update', $schedule)
-                            <a href="{{ route('class-schedules.edit', $schedule) }}" 
+                            <a href="{{ route('management.class-schedules.edit', $schedule) }}" 
                                class="text-gray-400 hover:text-yellow-400 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -263,7 +263,7 @@ function closeArchiveModal() {
         </svg>
         <h4 class="text-lg font-medium text-gray-100 mb-2">No Scheduled Classes</h4>
         <p class="text-gray-400 mb-4">This trainer hasn't been assigned to any classes yet.</p>
-        <a href="{{ route('class-schedules.create') }}?trainer_id={{ $trainerProfile->trainer_id }}" 
+        <a href="{{ route('management.class-schedules.create') }}?trainer_id={{ $trainerProfile->trainer_id }}" 
            class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>

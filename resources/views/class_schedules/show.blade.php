@@ -14,7 +14,7 @@
                 <svg class="w-4 h-4 text-gray-400 mx-1" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                 </svg>
-                <a href="{{ route('class-schedules.index') }}" class="text-gray-400 hover:text-gray-100 text-sm">Class Schedules</a>
+                <a href="{{ route('management.class-schedules.index') }}" class="text-gray-400 hover:text-gray-100 text-sm">Class Schedules</a>
             </div>
         </li>
         <li>
@@ -53,7 +53,7 @@
     <div class="flex items-center space-x-2">
         @if($classSchedule->trashed())
             @can('update', $classSchedule)
-            <form method="POST" action="{{ route('class-schedules.restore', $classSchedule->schedule_id) }}">
+            <form method="POST" action="{{ route('management.class-schedules.restore', $classSchedule->schedule_id) }}">
                 @csrf
                 <button type="submit" 
                         class="inline-flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg">
@@ -67,7 +67,7 @@
         @else
             @can('update', $classSchedule)
             @if($classSchedule->start_time->isFuture() && !str_starts_with($classSchedule->location ?? '', 'CANCELLED:'))
-            <a href="{{ route('class-schedules.edit', $classSchedule) }}" 
+            <a href="{{ route('management.class-schedules.edit', $classSchedule) }}" 
                class="inline-flex items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-lg">
                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -88,7 +88,7 @@
             @endcan
         @endif
         
-        <a href="{{ route('class-schedules.index') }}" class="text-gray-400 hover:text-white text-sm">
+        <a href="{{ route('management.class-schedules.index') }}" class="text-gray-400 hover:text-white text-sm">
             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
@@ -155,7 +155,7 @@
 <script>
 function openArchiveModal(scheduleId, scheduleName) {
     document.getElementById('scheduleName').textContent = scheduleName;
-    document.getElementById('archiveForm').action = `/class-schedules/${scheduleId}/archive`;
+    document.getElementById('archiveForm').action = '/management/class-schedules/' + scheduleId + '/archive';
     document.getElementById('archiveModal').classList.remove('hidden');
 }
 
@@ -252,7 +252,7 @@ function closeArchiveModal() {
 <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
     <div class="flex items-center justify-between mb-3">
         <h3 class="text-base font-semibold text-gray-100">Class Bookings</h3>
-        <a href="{{ route('class-bookings.create') }}?schedule_id={{ $classSchedule->schedule_id }}" 
+        <a href="{{ route('management.class-bookings.create') }}?schedule_id={{ $classSchedule->schedule_id }}" 
            class="inline-flex items-center px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -291,14 +291,14 @@ function closeArchiveModal() {
                     </td>
                     <td class="py-2 px-3">
                         <div class="flex items-center space-x-2">
-                            <a href="{{ route('class-bookings.show', $booking) }}" class="text-gray-400 hover:text-indigo-400">
+                            <a href="{{ route('management.class-bookings.show', $booking) }}" class="text-gray-400 hover:text-indigo-400">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                 </svg>
                             </a>
                             @can('update', $booking)
-                            <a href="{{ route('class-bookings.edit', $booking) }}" class="text-gray-400 hover:text-yellow-400">
+                            <a href="{{ route('management.class-bookings.edit', $booking) }}" class="text-gray-400 hover:text-yellow-400">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                 </svg>
@@ -318,7 +318,7 @@ function closeArchiveModal() {
         </svg>
         <h4 class="text-sm font-medium text-gray-100 mb-1">No Bookings Yet</h4>
         <p class="text-xs text-gray-400 mb-3">No customers have booked this class</p>
-        <a href="{{ route('class-bookings.create') }}?schedule_id={{ $classSchedule->schedule_id }}" 
+        <a href="{{ route('management.class-bookings.create') }}?schedule_id={{ $classSchedule->schedule_id }}" 
            class="inline-flex items-center px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>

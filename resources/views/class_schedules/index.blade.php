@@ -23,7 +23,7 @@
 <div class="flex justify-between items-center mb-4">
     <h1 class="text-xl font-bold text-gray-100">Class Schedules</h1>
     <div class="flex items-center space-x-2">
-        <a href="{{ route('class-schedules.index', ['show_archived' => $showArchived ? 0 : 1]) }}" 
+        <a href="{{ route('management.class-schedules.index', ['show_archived' => $showArchived ? 0 : 1]) }}" 
            class="inline-flex items-center px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded-lg transition-colors">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
@@ -31,7 +31,7 @@
             {{ $showArchived ? 'Show Active' : 'Show Archived' }}
         </a>
         @if(!$showArchived)
-        <a href="{{ route('class-schedules.create') }}" 
+        <a href="{{ route('management.class-schedules.create') }}" 
            class="inline-flex items-center px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -93,14 +93,14 @@
                     </td>
                     <td class="py-2 px-3">
                         <div class="flex items-center space-x-2">
-                            <a href="{{ route('class-schedules.show', $schedule->schedule_id) }}" class="text-gray-400 hover:text-indigo-400">
+                            <a href="{{ route('management.class-schedules.show', $schedule->schedule_id) }}" class="text-gray-400 hover:text-indigo-400">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                 </svg>
                             </a>
                             @if($showArchived)
-                                <form method="POST" action="{{ route('class-schedules.restore', $schedule->schedule_id) }}" 
+                                <form method="POST" action="{{ route('management.class-schedules.restore', $schedule->schedule_id) }}" 
                                       onsubmit="return confirm('Restore this schedule?')" class="inline">
                                     @csrf
                                     <button type="submit" class="text-gray-400 hover:text-green-400" title="Restore">
@@ -111,14 +111,14 @@
                                 </form>
                             @else
                                 @can('update', $schedule)
-                                <a href="{{ route('class-schedules.edit', $schedule) }}" class="text-gray-400 hover:text-yellow-400">
+                                <a href="{{ route('management.class-schedules.edit', $schedule) }}" class="text-gray-400 hover:text-yellow-400">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                     </svg>
                                 </a>
                                 @endcan
                                 @can('delete', $schedule)
-                                <form method="POST" action="{{ route('class-schedules.destroy', $schedule) }}" 
+                                <form method="POST" action="{{ route('management.class-schedules.destroy', $schedule) }}" 
                                       onsubmit="return confirm('Are you sure you want to archive this schedule? Historical data will be preserved.')" class="inline">
                                     @csrf
                                     @method('DELETE')
@@ -149,7 +149,7 @@
         </svg>
         <h3 class="text-sm font-medium text-gray-100 mb-1">No Class Schedules</h3>
         <p class="text-xs text-gray-400 mb-3">Schedule your first fitness class</p>
-        <a href="{{ route('class-schedules.create') }}" 
+        <a href="{{ route('management.class-schedules.create') }}" 
            class="inline-flex items-center px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>

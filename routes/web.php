@@ -1,4 +1,4 @@
-<?php
+    <?php
 
 use App\Http\Controllers\Auth\CustomerAuthController;
 use App\Http\Controllers\Auth\ManagementAuthController;
@@ -16,7 +16,10 @@ use App\Http\Controllers\MembershipPlanController;
 use App\Http\Controllers\FitnessClassController;
 use App\Http\Controllers\Api\CustomerApiController;
 use App\Http\Controllers\ReportController;
+use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Support\Facades\Route;
+
+Route::aliasMiddleware('role', RoleMiddleware::class);
 
 // =============================================================================
 // PUBLIC LANDING PAGE

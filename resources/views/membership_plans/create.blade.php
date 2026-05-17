@@ -16,7 +16,7 @@
                 <svg class="w-3 h-3 text-gray-400 mx-1" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                 </svg>
-                <a href="{{ route('membership-plans.index') }}" class="text-gray-400 hover:text-gray-100 text-sm transition-colors">
+                <a href="{{ route('management.membership-plans.index') }}" class="text-gray-400 hover:text-gray-100 text-sm transition-colors">
                     Membership Plans
                 </a>
             </div>
@@ -38,7 +38,7 @@
 </div>
 
 <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
-    <form method="POST" action="{{ route('membership-plans.store') }}">
+    <form method="POST" action="{{ route('management.membership-plans.store') }}">
         @csrf
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -91,7 +91,7 @@
         </div>
 
         <div class="flex items-center justify-end space-x-3 mt-6 pt-4 border-t border-slate-600">
-            <a href="{{ route('membership-plans.index') }}" 
+            <a href="{{ route('management.membership-plans.index') }}" 
                class="px-3 py-1.5 text-sm text-gray-400 hover:text-gray-100 transition-colors">
                 Cancel
             </a>

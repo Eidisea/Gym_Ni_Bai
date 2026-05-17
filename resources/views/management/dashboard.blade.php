@@ -101,7 +101,7 @@
                     </div>
                 </a>
 
-                <a href="{{ route('class-schedules.create') }}" 
+                <a href="{{ route('management.class-schedules.create') }}" 
                    class="flex items-center p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors group">
                     <div class="p-2 bg-green-600 rounded-lg group-hover:bg-green-500 transition-colors">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -114,7 +114,7 @@
                     </div>
                 </a>
 
-                <a href="{{ route('payment-transactions.create') }}" 
+                <a href="{{ route('management.payment-transactions.cash-process') }}" 
                    class="flex items-center p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors group">
                     <div class="p-2 bg-purple-600 rounded-lg group-hover:bg-purple-500 transition-colors">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -128,7 +128,7 @@
                 </a>
 
                 @can('admin-only')
-                <a href="{{ route('trainer-profiles.create') }}" 
+                <a href="{{ route('management.trainer-profiles.create') }}" 
                    class="flex items-center p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors group">
                     <div class="p-2 bg-yellow-600 rounded-lg group-hover:bg-yellow-500 transition-colors">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -185,7 +185,7 @@
     <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-100">Today's Class Schedule</h3>
-            <a href="{{ route('class-schedules.index') }}" 
+            <a href="{{ route('management.class-schedules.index') }}" 
                class="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">
                 View All Schedules →
             </a>
@@ -240,7 +240,7 @@
             </svg>
             <h4 class="text-lg font-medium text-gray-100 mb-2">No Classes Scheduled Today</h4>
             <p class="text-gray-400 mb-4">There are no fitness classes scheduled for today.</p>
-            <a href="{{ route('class-schedules.create') }}" 
+            <a href="{{ route('management.class-schedules.create') }}" 
                class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>

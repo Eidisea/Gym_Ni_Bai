@@ -15,7 +15,7 @@
                     <svg class="w-4 h-4 text-gray-400 mx-1" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                     </svg>
-                    <a href="{{ route('class-bookings.index') }}" class="text-gray-400 hover:text-gray-100 text-sm">Class Bookings</a>
+                    <a href="{{ route('management.class-bookings.index') }}" class="text-gray-400 hover:text-gray-100 text-sm">Class Bookings</a>
                 </div>
             </li>
             <li>
@@ -29,7 +29,7 @@
         </ol>
     </nav>
     
-    <a href="{{ route('class-bookings.index') }}" 
+    <a href="{{ route('management.class-bookings.index') }}" 
        class="inline-flex items-center text-sm text-gray-400 hover:text-white transition-colors">
         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -43,7 +43,7 @@
 </div>
 
 <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
-    <form method="POST" action="{{ route('class-bookings.store') }}">
+    <form method="POST" action="{{ route('management.class-bookings.store') }}">
         @csrf
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -92,7 +92,7 @@
         </div>
 
         <div class="flex items-center justify-end space-x-3 mt-6 pt-4 border-t border-slate-700">
-            <a href="{{ route('class-bookings.index') }}" 
+            <a href="{{ route('management.class-bookings.index') }}" 
                class="px-3 py-1.5 text-sm text-gray-400 hover:text-gray-100">
                 Cancel
             </a>

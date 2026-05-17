@@ -14,7 +14,7 @@
                 <svg class="w-4 h-4 text-gray-400 mx-1" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                 </svg>
-                <a href="{{ route('payment-transactions.index') }}" class="text-gray-400 hover:text-gray-100 text-sm">Payment Transactions</a>
+                <a href="{{ route('management.payment-transactions.index') }}" class="text-gray-400 hover:text-gray-100 text-sm">Payment Transactions</a>
             </div>
         </li>
         <li>
@@ -33,7 +33,7 @@
 </div>
 
 <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
-    <form method="POST" action="{{ route('payment-transactions.update', $paymentTransaction) }}">
+    <form method="POST" action="{{ route('management.payment-transactions.update', $paymentTransaction) }}">
         @csrf
         @method('PUT')
         
@@ -174,7 +174,7 @@
         @endif
 
         <div class="flex items-center justify-end space-x-3 mt-6 pt-4 border-t border-slate-700">
-            <a href="{{ route('payment-transactions.show', $paymentTransaction) }}" 
+            <a href="{{ route('management.payment-transactions.show', $paymentTransaction) }}" 
                class="px-3 py-1.5 text-sm text-gray-400 hover:text-gray-100">
                 Cancel
             </a>

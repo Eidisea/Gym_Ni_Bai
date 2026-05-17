@@ -27,7 +27,7 @@
     <div class="bg-slate-800 border border-slate-700 rounded p-4">
         <h2 class="text-sm font-semibold text-gray-100 mb-4">Cash Payment Processing</h2>
 
-        <form method="POST" action="{{ route('payments.cash-process.store') }}">
+        <form method="POST" action="{{ route('management.payments.cash-process.store') }}">
             @csrf
 
             <!-- Customer Selection -->
@@ -120,7 +120,7 @@
 
             <!-- Action Buttons -->
             <div class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-700">
-                <a href="{{ route('payment-transactions.index') }}" 
+                <a href="{{ route('management.payment-transactions.index') }}" 
                    class="px-3 py-1.5 text-xs font-medium bg-slate-700 hover:bg-slate-600 text-gray-100 rounded transition-colors">
                     Cancel
                 </a>

@@ -14,7 +14,7 @@
                 <svg class="w-4 h-4 text-gray-400 mx-1" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                 </svg>
-                <a href="{{ route('class-bookings.index') }}" class="text-gray-400 hover:text-gray-100 text-sm">Class Bookings</a>
+                <a href="{{ route('management.class-bookings.index') }}" class="text-gray-400 hover:text-gray-100 text-sm">Class Bookings</a>
             </div>
         </li>
         <li>
@@ -35,7 +35,7 @@
     </div>
     <div class="flex items-center space-x-2">
         @can('update', $classBooking)
-        <a href="{{ route('class-bookings.edit', $classBooking) }}" 
+        <a href="{{ route('management.class-bookings.edit', $classBooking) }}" 
            class="inline-flex items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-lg">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -43,7 +43,7 @@
             Edit
         </a>
         @if($classBooking->status === 'confirmed')
-        <form method="POST" action="{{ route('class-bookings.cancel', $classBooking) }}" 
+        <form method="POST" action="{{ route('management.class-bookings.cancel', $classBooking) }}" 
               onsubmit="return confirm('Cancel this booking? The seat will be released back to the class capacity.')" class="inline">
             @csrf
             <button type="submit" 
@@ -179,16 +179,16 @@
         <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
             <h2 class="text-base font-semibold text-gray-100 mb-3">Quick Actions</h2>
             <div class="space-y-2">
-                <a href="{{ route('customer-profiles.show', $classBooking->customerProfile) }}" 
+                <a href="{{ route('management.customer-profiles.show', $classBooking->customerProfile) }}" 
                    class="block w-full text-center px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-gray-100 text-sm rounded-lg">
                     View Customer Profile
                 </a>
-                <a href="{{ route('class-schedules.show', $classBooking->schedule) }}" 
+                <a href="{{ route('management.class-schedules.show', $classBooking->schedule) }}" 
                    class="block w-full text-center px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-gray-100 text-sm rounded-lg">
                     View Class Schedule
                 </a>
                 @if($classBooking->transactions->isEmpty())
-                <a href="{{ route('payment-transactions.create') }}?booking_id={{ $classBooking->booking_id }}" 
+                <a href="{{ route('management.payment-transactions.create') }}?booking_id={{ $classBooking->booking_id }}" 
                    class="block w-full text-center px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg">
                     Add Payment
                 </a>

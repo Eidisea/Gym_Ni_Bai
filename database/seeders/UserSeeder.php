@@ -2,45 +2,48 @@
 
 namespace Database\Seeders;
 
-use App\Models\Role;
-use App\Models\User;
 use Illuminate\Database\Seeder;
+use App\Models\User;
+use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
-        $adminRole = Role::where('role_name', 'Admin')->first()->role_id;
-        $staffRole = Role::where('role_name', 'Staff')->first()->role_id;
-        $customerRole = Role::where('role_name', 'Customer')->first()->role_id;
+        // Fetch the 3 roles dynamically
+        $adminRole = Role::where('role_name', Role::ADMIN)->first();
+        $staffRole = Role::where('role_name', Role::STAFF)->first();
+        $customerRole = Role::where('role_name', Role::CUSTOMER)->first();
 
-        // 1 Admin
-        User::create([
-            'role_id' => $adminRole,
-            'email' => 'admin@gymnibai.com',
-            'password' => Hash::make('password123'),
-            'is_active' => true,
-        ]);
-
-        // 2 Staff Members
-        for ($i = 1; $i <= 2; $i++) {
-            User::create([
-                'role_id' => $staffRole,
-                'email' => "staff{$i}@gymnibai.com",
+        // 1. Create Admin
+        User::firstOrCreate(
+            ['email' => 'admin@gymnibai.com'],
+            [
                 'password' => Hash::make('password123'),
-                'is_active' => true,
-            ]);
-        }
+                'role_id' => $adminRole->role_id,
+            ]
+        );
 
-        // 10 Customers
-        for ($i = 1; $i <= 10; $i++) {
-            User::create([
-                'role_id' => $customerRole,
-                'email' => "customer{$i}@example.com",
+        // 2. Create Staff
+        User::firstOrCreate(
+            ['email' => 'staff@gymnibai.com'],
+            [
                 'password' => Hash::make('password123'),
-                'is_active' => true,
-            ]);
-        }
+                'role_id' => $staffRole->role_id,
+            ]
+        );
+
+        // 3. Create Customer
+        User::firstOrCreate(
+            ['email' => 'customer@gmail.com'],
+            [
+                'password' => Hash::make('password123'),
+                'role_id' => $customerRole->role_id,
+            ]
+        );
     }
 }

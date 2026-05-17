@@ -29,7 +29,7 @@
     </div>
     <div class="flex items-center space-x-2">
         @can('admin-only')
-        <a href="{{ route('trainer-profiles.index', ['archived' => $showArchived ? 0 : 1]) }}" 
+        <a href="{{ route('management.trainer-profiles.index', ['archived' => $showArchived ? 0 : 1]) }}" 
            class="inline-flex items-center px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded-lg transition-colors">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
@@ -39,7 +39,7 @@
         @endcan
         @if(!$showArchived)
         @can('create', App\Models\TrainerProfile::class)
-        <a href="{{ route('trainer-profiles.create') }}" 
+        <a href="{{ route('management.trainer-profiles.create') }}" 
            class="inline-flex items-center px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg transition-colors">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -76,7 +76,7 @@
         params.set('archived', '1');
         @endif
         
-        const url = '{{ route('trainer-profiles.index') }}' + (params.toString() ? '?' + params.toString() : '');
+        const url = '{{ route('management.trainer-profiles.index') }}' + (params.toString() ? '?' + params.toString() : '');
         
         try {
             const response = await fetch(url, {
@@ -249,7 +249,7 @@
             </span>
             
             <div class="flex items-center space-x-2">
-                <a href="{{ route('trainer-profiles.show', $trainer->trainer_id) }}" 
+                <a href="{{ route('management.trainer-profiles.show', $trainer->trainer_id) }}" 
                    class="text-gray-400 hover:text-indigo-400 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -258,7 +258,7 @@
                 </a>
                 @if($showArchived)
                     @can('admin-only')
-                    <form method="POST" action="{{ route('trainer-profiles.restore', $trainer->trainer_id) }}" 
+                    <form method="POST" action="{{ route('management.trainer-profiles.restore', $trainer->trainer_id) }}" 
                           onsubmit="return confirm('Restore this trainer?')" class="inline">
                         @csrf
                         <button type="submit" class="text-gray-400 hover:text-green-400 transition-colors" title="Restore">
@@ -270,7 +270,7 @@
                     @endcan
                 @else
                     @can('update', $trainer)
-                    <a href="{{ route('trainer-profiles.edit', $trainer) }}" 
+                    <a href="{{ route('management.trainer-profiles.edit', $trainer) }}" 
                        class="text-gray-400 hover:text-yellow-400 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -299,7 +299,7 @@
             <p class="text-sm text-gray-400 mb-3">{{ $showArchived ? 'No archived trainers.' : 'Add your first fitness trainer.' }}</p>
             @if(!$showArchived)
             @can('create', App\Models\TrainerProfile::class)
-            <a href="{{ route('trainer-profiles.create') }}" 
+            <a href="{{ route('management.trainer-profiles.create') }}" 
                class="inline-flex items-center px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg transition-colors">
                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -357,7 +357,7 @@
 <script>
 function openArchiveModal(trainerId, trainerName) {
     document.getElementById('trainerName').textContent = trainerName;
-    document.getElementById('archiveForm').action = `/trainer-profiles/${trainerId}/archive`;
+    document.getElementById('archiveForm').action = '/management/trainer-profiles/' + trainerId + '/archive';
     document.getElementById('archiveModal').classList.remove('hidden');
 }
 

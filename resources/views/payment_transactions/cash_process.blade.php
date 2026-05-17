@@ -16,7 +16,7 @@
                 <svg class="w-3 h-3 text-gray-400 mx-1" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                 </svg>
-                <a href="{{ route('payment-transactions.index') }}" class="text-gray-400 hover:text-gray-100 text-sm transition-colors">
+                <a href="{{ route('management.payment-transactions.index') }}" class="text-gray-400 hover:text-gray-100 text-sm transition-colors">
                     Payments
                 </a>
             </div>
@@ -36,7 +36,7 @@
     <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
         <h2 class="text-xl font-semibold text-gray-100 mb-6 text-center">Cash Payment Processing</h2>
         
-        <form method="POST" action="{{ route('payment-transactions.cash-process.store') }}" @submit.prevent="submitPayment">
+        <form method="POST" action="{{ route('management.payment-transactions.cash-process.store') }}" @submit.prevent="submitPayment">
             @csrf
             
             <input type="hidden" name="customer_id" x-model="customerId">
@@ -86,7 +86,7 @@
                         Select a customer to view their active plan
                     </div>
                     <div x-show="customerId && !subscriptionId && !loading" class="mt-2">
-                        <a href="{{ route('membership-subscriptions.create') }}" 
+                        <a href="{{ route('management.membership-subscriptions.create') }}" 
                            class="inline-flex items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-xs rounded-lg transition-colors">
                             <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -134,7 +134,7 @@
             </div>
 
             <div class="flex items-center justify-end space-x-3 mt-6 pt-6 border-t border-slate-700">
-                <a href="{{ route('payment-transactions.index') }}" 
+                <a href="{{ route('management.payment-transactions.index') }}" 
                    class="px-4 py-2 text-sm bg-slate-700 hover:bg-slate-600 text-gray-100 rounded-lg transition-colors">
                     Cancel
                 </a>
@@ -170,7 +170,7 @@ function cashPOS() {
             }
 
             try {
-                const response = await fetch(`/api/customers/search?q=${encodeURIComponent(this.searchQuery)}`);
+                const response = await fetch('/management/api/customers/search?q=' + encodeURIComponent(this.searchQuery));
                 const data = await response.json();
                 this.searchResults = data.customers || [];
                 this.showDropdown = true;
@@ -196,7 +196,7 @@ function cashPOS() {
             this.amountDue = 0;
             
             try {
-                const response = await fetch(`/api/customers/${this.customerId}/active-subscription`);
+                const response = await fetch('/management/api/customers/' + this.customerId + '/active-subscription');
                 const data = await response.json();
                 
                 if (data.subscription) {

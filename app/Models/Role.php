@@ -6,10 +6,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Role extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     protected $primaryKey = 'role_id';
 
     protected $fillable = [
@@ -19,7 +20,6 @@ class Role extends Model
     // Constants for use throughout the app — avoids magic strings
     const ADMIN = 'Admin';
     const STAFF = 'Staff';
-    const TRAINER = 'Trainer';
     const CUSTOMER = 'Customer';
 
     // Relationships

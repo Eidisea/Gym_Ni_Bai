@@ -2,17 +2,22 @@
 
 namespace Database\Seeders;
 
-use App\Models\Role;
 use Illuminate\Database\Seeder;
+use App\Models\Role;
 
 class RoleSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
-    {
-        $roles = ['Admin', 'Staff', 'Trainer', 'Customer'];
+{
+    // Using the constants you already smartly defined in the Role model
+    $roles = [Role::ADMIN, Role::STAFF, Role::CUSTOMER];
 
-        foreach ($roles as $role) {
-            Role::create(['role_name' => $role]);
-        }
+    foreach ($roles as $roleName) {
+        // Changed 'name' to 'role_name' to match your schema
+        Role::firstOrCreate(['role_name' => $roleName]);
     }
+}
 }

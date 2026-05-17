@@ -14,7 +14,7 @@
                 <svg class="w-4 h-4 text-gray-400 mx-1" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                 </svg>
-                <a href="{{ route('payment-transactions.index') }}" class="text-gray-400 hover:text-gray-100 text-sm">Payment Transactions</a>
+                <a href="{{ route('management.payment-transactions.index') }}" class="text-gray-400 hover:text-gray-100 text-sm">Payment Transactions</a>
             </div>
         </li>
         <li>
@@ -35,7 +35,7 @@
     </div>
     <div class="flex items-center space-x-2">
         @can('update', $paymentTransaction)
-        <a href="{{ route('payment-transactions.edit', $paymentTransaction) }}" 
+        <a href="{{ route('management.payment-transactions.edit', $paymentTransaction) }}" 
            class="inline-flex items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-lg">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -44,7 +44,7 @@
         </a>
         @endcan
         @can('delete', $paymentTransaction)
-        <form method="POST" action="{{ route('payment-transactions.destroy', $paymentTransaction) }}" 
+        <form method="POST" action="{{ route('management.payment-transactions.destroy', $paymentTransaction) }}" 
               onsubmit="return confirm('Are you sure you want to VOID this transaction? This action will permanently alter financial ledgers.')" class="inline">
             @csrf
             @method('DELETE')
@@ -260,18 +260,18 @@
         <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
             <h2 class="text-base font-semibold text-gray-100 mb-3">Quick Actions</h2>
             <div class="space-y-2">
-                <a href="{{ route('customer-profiles.show', $paymentTransaction->customerProfile) }}" 
+                <a href="{{ route('management.customer-profiles.show', $paymentTransaction->customerProfile) }}" 
                    class="block w-full text-center px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-gray-100 text-sm rounded-lg">
                     View Customer Profile
                 </a>
                 @if($paymentTransaction->subscription)
-                <a href="{{ route('membership-subscriptions.show', $paymentTransaction->subscription) }}" 
+                <a href="{{ route('management.membership-subscriptions.show', $paymentTransaction->subscription) }}" 
                    class="block w-full text-center px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-gray-100 text-sm rounded-lg">
                     View Subscription
                 </a>
                 @endif
                 @if($paymentTransaction->booking)
-                <a href="{{ route('class-bookings.show', $paymentTransaction->booking) }}" 
+                <a href="{{ route('management.class-bookings.show', $paymentTransaction->booking) }}" 
                    class="block w-full text-center px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-gray-100 text-sm rounded-lg">
                     View Booking
                 </a>

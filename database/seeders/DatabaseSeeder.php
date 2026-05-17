@@ -11,13 +11,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Seed in the correct order to maintain referential integrity
+        // STRICT ORDER OF OPERATIONS
         $this->call([
-            RoleSeeder::class,        // Level 1: Roles first
-            UserSeeder::class,        // Level 2: Users (depends on roles)
-            ProfileSeeder::class,     // Level 3: Profiles (depends on users)
-            ConfigSeeder::class,      // Level 4: Plans & Classes (independent)
-            TransactionSeeder::class, // Level 5: Schedules, Subscriptions, Bookings, Transactions
+            RoleSeeder::class,       // 1. Create Roles first
+            UserSeeder::class,       // 2. Create Users (depends on Roles)
         ]);
     }
 }

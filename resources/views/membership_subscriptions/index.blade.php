@@ -22,7 +22,7 @@
 
 <div class="flex justify-between items-center mb-4">
     <h1 class="text-xl font-bold text-gray-100">Membership Subscriptions</h1>
-    <a href="{{ route('membership-subscriptions.create') }}" 
+    <a href="{{ route('management.membership-subscriptions.create') }}" 
        class="inline-flex items-center px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg">
         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
@@ -53,7 +53,7 @@
         if (this.filter) params.set('filter', this.filter);
         if (this.sort) params.set('sort', this.sort);
         
-        const url = '{{ route('membership-subscriptions.index') }}' + (params.toString() ? '?' + params.toString() : '');
+        const url = '{{ route('management.membership-subscriptions.index') }}' + (params.toString() ? '?' + params.toString() : '');
         
         try {
             const response = await fetch(url, {
@@ -243,14 +243,14 @@
                     </td>
                     <td class="py-2 px-3">
                         <div class="flex items-center space-x-2">
-                            <a href="{{ route('membership-subscriptions.show', $subscription) }}" class="text-gray-400 hover:text-indigo-400">
+                            <a href="{{ route('management.membership-subscriptions.show', $subscription) }}" class="text-gray-400 hover:text-indigo-400">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                 </svg>
                             </a>
                             @can('update', $subscription)
-                            <a href="{{ route('membership-subscriptions.edit', $subscription) }}" class="text-gray-400 hover:text-yellow-400">
+                            <a href="{{ route('management.membership-subscriptions.edit', $subscription) }}" class="text-gray-400 hover:text-yellow-400">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                 </svg>
@@ -275,7 +275,7 @@
         </svg>
         <h3 class="text-sm font-medium text-gray-100 mb-1">No Membership Subscriptions</h3>
         <p class="text-xs text-gray-400 mb-3">Create your first membership subscription</p>
-        <a href="{{ route('membership-subscriptions.create') }}" 
+        <a href="{{ route('management.membership-subscriptions.create') }}" 
            class="inline-flex items-center px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>

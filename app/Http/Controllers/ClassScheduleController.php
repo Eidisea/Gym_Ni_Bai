@@ -78,7 +78,7 @@ class ClassScheduleController extends Controller
 
         ClassSchedule::create($validated);
 
-        return redirect()->route('class-schedules.index')
+        return redirect()->route('management.class-schedules.index')
             ->with('success', 'Class schedule created successfully.');
     }
 
@@ -110,7 +110,7 @@ class ClassScheduleController extends Controller
 
         // Prevent editing past schedules
         if ($classSchedule->start_time->isPast()) {
-            return redirect()->route('class-schedules.show', $classSchedule)
+            return redirect()->route('management.class-schedules.show', $classSchedule)
                 ->with('error', 'Cannot edit past class schedules.');
         }
 
@@ -126,7 +126,7 @@ class ClassScheduleController extends Controller
 
         // Prevent updating past schedules
         if ($classSchedule->start_time->isPast()) {
-            return redirect()->route('class-schedules.show', $classSchedule)
+            return redirect()->route('management.class-schedules.show', $classSchedule)
                 ->with('error', 'Cannot update past class schedules.');
         }
 
@@ -140,7 +140,7 @@ class ClassScheduleController extends Controller
 
         $classSchedule->update($validated);
 
-        return redirect()->route('class-schedules.show', $classSchedule)
+        return redirect()->route('management.class-schedules.show', $classSchedule)
             ->with('success', 'Class schedule updated successfully.');
     }
 
@@ -160,7 +160,7 @@ class ClassScheduleController extends Controller
         // Soft delete (archive) the schedule
         $classSchedule->delete();
 
-        return redirect()->route('class-schedules.index')
+        return redirect()->route('management.class-schedules.index')
             ->with('success', 'Class schedule archived successfully. Historical data preserved.');
     }
 
@@ -202,7 +202,7 @@ class ClassScheduleController extends Controller
 
         $classSchedule->delete();
 
-        return redirect()->route('class-schedules.index')
+        return redirect()->route('management.class-schedules.index')
             ->with('success', 'Class schedule archived successfully.');
     }
 
@@ -222,7 +222,7 @@ class ClassScheduleController extends Controller
 
         // Check if already in the past
         if ($classSchedule->start_time->isPast()) {
-            return redirect()->route('class-schedules.show', $id)
+            return redirect()->route('management.class-schedules.show', $id)
                 ->with('error', 'Cannot cancel past class schedules.');
         }
 
@@ -249,7 +249,7 @@ class ClassScheduleController extends Controller
         //         ->send(new ClassCancelledNotification($classSchedule, $validated['cancellation_reason']));
         // }
 
-        return redirect()->route('class-schedules.index')
+        return redirect()->route('management.class-schedules.index')
             ->with('success', "Class schedule cancelled. {$confirmedBookings->count()} customer(s) notified.");
     }
 
@@ -276,7 +276,7 @@ class ClassScheduleController extends Controller
             'archive_reason' => null,
         ]);
 
-        return redirect()->route('class-schedules.show', $id)
+        return redirect()->route('management.class-schedules.show', $id)
             ->with('success', 'Class schedule restored successfully.');
     }
 }

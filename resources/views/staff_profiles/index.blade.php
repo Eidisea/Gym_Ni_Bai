@@ -29,7 +29,7 @@
     </div>
     <div class="flex items-center space-x-2">
         @can('admin-only')
-        <a href="{{ route('staff-profiles.index', ['archived' => $showArchived ? 0 : 1]) }}" 
+        <a href="{{ route('management.staff-profiles.index', ['archived' => $showArchived ? 0 : 1]) }}" 
            class="inline-flex items-center px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded-lg transition-colors">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
@@ -39,7 +39,7 @@
         @endcan
         @if(!$showArchived)
         @can('create', App\Models\StaffProfile::class)
-        <a href="{{ route('staff-profiles.create') }}" 
+        <a href="{{ route('management.staff-profiles.create') }}" 
            class="inline-flex items-center px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg transition-colors">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -76,7 +76,7 @@
         params.set('archived', '1');
         @endif
         
-        const url = '{{ route('staff-profiles.index') }}' + (params.toString() ? '?' + params.toString() : '');
+        const url = '{{ route('management.staff-profiles.index') }}' + (params.toString() ? '?' + params.toString() : '');
         
         try {
             const response = await fetch(url, {
@@ -251,7 +251,7 @@
                     </td>
                     <td class="py-2 px-3 text-sm text-gray-300">
                         <div class="flex items-center space-x-2">
-                            <a href="{{ route('staff-profiles.show', $staff->staff_id) }}" 
+                            <a href="{{ route('management.staff-profiles.show', $staff->staff_id) }}" 
                                class="text-gray-400 hover:text-indigo-400 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -260,7 +260,7 @@
                             </a>
                             @if($showArchived)
                                 @can('admin-only')
-                                <form method="POST" action="{{ route('staff-profiles.restore', $staff->staff_id) }}" 
+                                <form method="POST" action="{{ route('management.staff-profiles.restore', $staff->staff_id) }}" 
                                       onsubmit="return confirm('Restore this staff member?')" class="inline">
                                     @csrf
                                     <button type="submit" class="text-gray-400 hover:text-green-400 transition-colors" title="Restore">
@@ -272,7 +272,7 @@
                                 @endcan
                             @else
                                 @can('update', $staff)
-                                <a href="{{ route('staff-profiles.edit', $staff) }}" 
+                                <a href="{{ route('management.staff-profiles.edit', $staff) }}" 
                                    class="text-gray-400 hover:text-yellow-400 transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -310,7 +310,7 @@
         <p class="text-sm text-gray-400 mb-3">{{ $showArchived ? 'No deactivated staff members.' : 'Add your first staff member.' }}</p>
         @if(!$showArchived)
         @can('create', App\Models\StaffProfile::class)
-        <a href="{{ route('staff-profiles.create') }}" 
+        <a href="{{ route('management.staff-profiles.create') }}" 
            class="inline-flex items-center px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg transition-colors">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -362,7 +362,7 @@
 <script>
 function openDeactivateModal(staffId, staffName) {
     document.getElementById('staffName').textContent = staffName;
-    document.getElementById('deactivateForm').action = `/staff-profiles/${staffId}/archive`;
+    document.getElementById('deactivateForm').action = '/management/staff-profiles/' + staffId + '/archive';
     document.getElementById('deactivateModal').classList.remove('hidden');
 }
 

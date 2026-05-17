@@ -17,7 +17,7 @@
                 <svg class="w-4 h-4 text-gray-400 mx-1" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                 </svg>
-                <a href="{{ route('staff-profiles.index') }}" class="text-gray-400 hover:text-gray-100 transition-colors">
+                <a href="{{ route('management.staff-profiles.index') }}" class="text-gray-400 hover:text-gray-100 transition-colors">
                     Staff Profiles
                 </a>
             </div>
@@ -41,7 +41,7 @@
     </div>
     <div class="flex items-center space-x-3">
         @can('update', $staffProfile)
-        <a href="{{ route('staff-profiles.edit', $staffProfile) }}" 
+        <a href="{{ route('management.staff-profiles.edit', $staffProfile) }}" 
            class="inline-flex items-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-lg transition-colors">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -51,7 +51,7 @@
         @endcan
         
         @can('admin-only')
-        <button onclick="openDeactivateModal({{ $staffProfile->staff_id }}, '{{ $staffProfile->full_name }}')" 
+        <button type="button" onclick="openDeactivateModal({{ $staffProfile->staff_id }}, {!! json_encode($staffProfile->full_name) !!})" 
                 class="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
@@ -99,7 +99,7 @@
 <script>
 function openDeactivateModal(staffId, staffName) {
     document.getElementById('staffName').textContent = staffName;
-    document.getElementById('deactivateForm').action = `/staff-profiles/${staffId}/archive`;
+    document.getElementById('deactivateForm').action = '/management/staff-profiles/' + staffId + '/archive';
     document.getElementById('deactivateModal').classList.remove('hidden');
 }
 
@@ -261,12 +261,12 @@ function closeDeactivateModal() {
         <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
             <h2 class="text-lg font-semibold text-gray-100 mb-4">Quick Actions</h2>
             <div class="space-y-3">
-                <a href="{{ route('staff-profiles.edit', $staffProfile) }}" 
+                <a href="{{ route('management.staff-profiles.edit', $staffProfile) }}" 
                    class="block w-full text-center px-4 py-2 bg-slate-700 hover:bg-slate-600 text-gray-100 rounded-lg transition-colors">
                     Edit Profile
                 </a>
                 @if($staffProfile->cashPayments->count() > 0)
-                <a href="{{ route('payment-transactions.index') }}" 
+                <a href="{{ route('management.payment-transactions.index') }}" 
                    class="block w-full text-center px-4 py-2 bg-slate-700 hover:bg-slate-600 text-gray-100 rounded-lg transition-colors">
                     View All Transactions
                 </a>
