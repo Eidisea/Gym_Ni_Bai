@@ -72,7 +72,6 @@ class ClassBooking extends Model
 
     public function canBeCancelled(): bool
     {
-        return $this->isConfirmed() && 
-               $this->schedule->start_time > now()->addHours(2); // 2-hour cancellation policy
+        return $this->isConfirmed();
     }
 }

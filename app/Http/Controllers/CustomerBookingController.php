@@ -235,8 +235,15 @@ class CustomerBookingController extends Controller
         return view('customer.my_bookings', compact('upcoming', 'past'));
     }
 
-    public function cancelBooking(Request $request, ClassBooking $booking)
+    public function cancelBooking(Request $request, $bookingId)
     {
+        // Manually load the booking
+        $booking = ClassBooking::where('booking_id', $bookingId)->first();
+
+        if (!$booking) {
+            return redirect()->back()->with('error', 'Booking not found.');
+        }
+
         $customerProfile = Auth::user()->customerProfile;
         
         if (!$customerProfile) {

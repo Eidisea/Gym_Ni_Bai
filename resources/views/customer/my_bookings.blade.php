@@ -82,7 +82,7 @@
                             <div class="mt-4 md:mt-0 md:ml-6">
                                 <button
                                     type="button"
-                                    @click="cancelAction = '{{ route('customer.bookings.cancel', $booking) }}'; $dispatch('open-modal', 'confirm-cancel-booking')"
+                                    @click="cancelAction = '{{ route('customer.bookings.cancel', $booking->booking_id) }}'; $dispatch('open-modal', 'confirm-cancel-booking')"
                                     class="px-4 py-2 border border-red-600 text-red-600 hover:bg-red-50 text-sm font-medium rounded-lg transition">
                                     Cancel Booking
                                 </button>
