@@ -60,11 +60,19 @@ class ClassSchedule extends Model
     }
 
     // Helper methods
+    /**
+     * Number of confirmed bookings for this schedule.
+     */
     public function getBookedSlotsAttribute(): int
     {
         return $this->bookings()->where('status', 'confirmed')->count();
     }
 
+    /**
+     * Remaining bookable slots.
+     * available_slots is the TOTAL capacity (immutable).
+     * Remaining = total capacity minus confirmed bookings.
+     */
     public function getRemainingSlotsAttribute(): int
     {
         return max(0, $this->available_slots - $this->booked_slots);

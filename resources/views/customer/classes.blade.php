@@ -1,7 +1,7 @@
 @extends('layouts.customer')
 
 @section('content')
-<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full" x-data="{ bookingAction: '', bookingClass: '', bookingTrainer: '', bookingDateTime: '' }">
 
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-slate-900">Find a Class</h1>
@@ -38,7 +38,7 @@
             @foreach($schedules as $schedule)
                 @php
                     $isBooked   = in_array($schedule->schedule_id, $userBookings);
-                    $isFull     = $schedule->available_slots <= 0;
+                    $isFull     = $schedule->remaining_slots <= 0;
                     $start      = \Carbon\Carbon::parse($schedule->start_time);
                     $end        = \Carbon\Carbon::parse($schedule->end_time);
                     $duration   = $start->diffInMinutes($end);
@@ -106,11 +106,11 @@
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Booked</span>
                             @else
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
-                                    {{ $schedule->available_slots }} slot{{ $schedule->available_slots === 1 ? '' : 's' }} left
+                                    {{ $schedule->remaining_slots }} slot{{ $schedule->remaining_slots === 1 ? '' : 's' }} left
                                 </span>
                             @endif
 
-                            <form method="POST" action="{{ route('customer.classes.book', $schedule) }}">
+                            <form method="POST" action="{{ route('customer.classes.book', $schedule->schedule_id) }}" id="booking-form-{{ $schedule->schedule_id }}">
                                 @csrf
                                 @if($isBooked)
                                     <button type="button" disabled class="px-4 py-1.5 bg-slate-200 text-slate-500 text-xs font-medium rounded-lg cursor-not-allowed">
@@ -125,9 +125,20 @@
                                         Membership Required
                                     </button>
                                 @else
-                                    <button type="submit" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition">
+                                    <button 
+                                        type="button" 
+                                        @click="
+                                            bookingAction = '{{ route('customer.classes.book', $schedule->schedule_id) }}';
+                                            bookingClass = '{{ $schedule->fitnessClass?->class_name ?? 'Archived Class' }}';
+                                            bookingTrainer = '{{ $schedule->trainerProfile?->first_name ?? 'N/A' }} {{ $schedule->trainerProfile?->last_name ?? '' }}';
+                                            bookingDateTime = '{{ $start->format('l, M j, Y') }} at {{ $start->format('g:i A') }}';
+                                            $dispatch('open-modal', 'confirm-booking')
+                                        "
+                                        class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition">
                                         Book Class
                                     </button>
+                                @endif
+                            </form>
                                 @endif
                             </form>
                         </div>
@@ -148,4 +159,52 @@
     @endif
 
 </div>
+
+{{-- Booking Confirmation Modal --}}
+<x-modal name="confirm-booking" maxWidth="md">
+    <div class="p-6">
+        <div class="flex items-center mb-4">
+            <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-indigo-100 mr-4">
+                <svg class="h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-900">Confirm Class Booking</h3>
+        </div>
+
+        <div class="mb-4">
+            <p class="text-sm text-slate-600 mb-2">You're about to book the following class:</p>
+            <div class="bg-slate-50 rounded-lg p-4">
+                <h4 class="font-semibold text-slate-900" x-text="bookingClass"></h4>
+                <p class="text-sm text-slate-600 mt-1">
+                    <span class="font-medium">Trainer:</span> <span x-text="bookingTrainer"></span>
+                </p>
+                <p class="text-sm text-slate-600">
+                    <span class="font-medium">Date & Time:</span> <span x-text="bookingDateTime"></span>
+                </p>
+            </div>
+        </div>
+
+        <p class="text-sm text-slate-500 mb-6">A confirmation email will be sent to you after booking.</p>
+
+        <div class="flex justify-end gap-3">
+            <button
+                type="button"
+                @click="$dispatch('close-modal', 'confirm-booking')"
+                class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition">
+                Cancel
+            </button>
+
+            <form method="POST" :action="bookingAction">
+                @csrf
+                <button
+                    type="submit"
+                    class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition">
+                    Confirm Booking
+                </button>
+            </form>
+        </div>
+    </div>
+</x-modal>
+
 @endsection

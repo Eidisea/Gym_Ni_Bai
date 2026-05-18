@@ -238,10 +238,11 @@ function closeArchiveModal() {
                 <div class="pt-2 border-t border-slate-600">
                     <div class="flex justify-between mb-1">
                         <span class="text-gray-400">Capacity</span>
-                        <span class="text-gray-100 font-medium">{{ number_format(($classSchedule->booked_slots / $classSchedule->available_slots) * 100, 1) }}%</span>
+                        @php $capacityPct = $classSchedule->available_slots > 0 ? ($classSchedule->booked_slots / $classSchedule->available_slots) * 100 : 100; @endphp
+                        <span class="text-gray-100 font-medium">{{ number_format($capacityPct, 1) }}%</span>
                     </div>
                     <div class="w-full bg-slate-700 rounded-full h-1.5">
-                        <div class="bg-indigo-600 h-1.5 rounded-full" style="width: {{ ($classSchedule->booked_slots / $classSchedule->available_slots) * 100 }}%"></div>
+                        <div class="bg-indigo-600 h-1.5 rounded-full" style="width: {{ $capacityPct }}%"></div>
                     </div>
                 </div>
             </div>

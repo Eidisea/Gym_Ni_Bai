@@ -21,6 +21,7 @@ class CustomerBookingController extends Controller
                 'trainerProfile' => fn($q) => $q->withTrashed()
             ])
             ->where('start_time', '>=', now())
+            ->whereNull('cancellation_reason')  // exclude cancelled schedules
             ->orderBy('start_time', 'asc')
             ->get();
 
@@ -46,7 +47,7 @@ class CustomerBookingController extends Controller
         return view('customer.classes', compact('schedules', 'userBookings', 'hasActiveMembership'));
     }
 
-    public function store(Request $request, ClassSchedule $schedule)
+    public function store(Request $request, $scheduleId)
     {
         $customerProfile = Auth::user()->customerProfile;
         
@@ -57,22 +58,32 @@ class CustomerBookingController extends Controller
 
         $customerId = $customerProfile->customer_id;
 
+        // Manually load the schedule using the schedule_id
+        $schedule = ClassSchedule::where('schedule_id', $scheduleId)->first();
+
         // Log initial state for debugging
         Log::info("Booking attempt started", [
-            'schedule_id' => $schedule->schedule_id,
+            'schedule_id' => $scheduleId,
             'customer_id' => $customerId,
-            'initial_available_slots' => $schedule->available_slots,
-            'schedule_exists' => $schedule->exists,
-            'schedule_deleted_at' => $schedule->deleted_at
+            'schedule_found' => $schedule ? 'yes' : 'no',
+            'initial_available_slots' => $schedule ? $schedule->available_slots : 'N/A',
+            'schedule_exists' => $schedule ? $schedule->exists : false,
+            'schedule_deleted_at' => $schedule ? $schedule->deleted_at : 'N/A'
         ]);
 
         // Verify the schedule exists and is not soft-deleted
         if (!$schedule || $schedule->trashed()) {
             Log::warning("Schedule not available", [
-                'schedule_id' => $schedule->schedule_id ?? 'null',
-                'trashed' => $schedule->trashed() ?? 'unknown'
+                'schedule_id' => $scheduleId,
+                'schedule_found' => $schedule ? 'yes' : 'no',
+                'trashed' => $schedule ? $schedule->trashed() : 'unknown'
             ]);
             return redirect()->back()->with('error', 'This class schedule is no longer available.');
+        }
+
+        // Guard against booking a cancelled schedule
+        if ($schedule->cancellation_reason) {
+            return redirect()->back()->with('error', 'This class has been cancelled and is no longer available for booking.');
         }
 
         // Guard: active membership required to book a class
@@ -87,27 +98,40 @@ class CustomerBookingController extends Controller
         }
 
         try {
-            // Simple transaction without complex re-querying
             DB::transaction(function () use ($schedule, $customerId) {
-                
-                // Refresh the schedule model to get the latest data from database
-                $schedule->refresh();
-                
-                // Log current state
+
+                // Re-fetch with a pessimistic lock so concurrent requests queue up
+                // Use withTrashed() to avoid the SoftDeletes scope silently 404-ing,
+                // then verify it's not actually deleted ourselves
+                $locked = ClassSchedule::withTrashed()
+                    ->lockForUpdate()
+                    ->findOrFail($schedule->schedule_id);
+
+                if ($locked->trashed()) {
+                    throw new \Exception('This class schedule is no longer available.');
+                }
+
+                // Compute remaining slots dynamically from actual confirmed booking count
+                // available_slots is the TOTAL capacity (immutable) — never decremented
+                $confirmedBookings = ClassBooking::where('schedule_id', $locked->schedule_id)
+                    ->where('status', 'confirmed')
+                    ->count();
+
                 Log::info("Inside transaction", [
-                    'schedule_id' => $schedule->schedule_id,
-                    'available_slots' => $schedule->available_slots,
-                    'customer_id' => $customerId
+                    'schedule_id'      => $locked->schedule_id,
+                    'total_capacity'   => $locked->available_slots,
+                    'confirmed_booked' => $confirmedBookings,
+                    'slots_remaining'  => $locked->available_slots - $confirmedBookings,
+                    'customer_id'      => $customerId,
                 ]);
-                
-                // Check if the schedule is available for booking
-                if ($schedule->available_slots <= 0) {
+
+                if ($confirmedBookings >= $locked->available_slots) {
                     throw new \Exception('This class is full.');
                 }
 
-                // Check for existing booking
+                // Check for existing confirmed booking
                 $existingBooking = ClassBooking::where('customer_id', $customerId)
-                    ->where('schedule_id', $schedule->schedule_id)
+                    ->where('schedule_id', $locked->schedule_id)
                     ->where('status', 'confirmed')
                     ->first();
 
@@ -115,20 +139,16 @@ class CustomerBookingController extends Controller
                     throw new \Exception('You are already booked for this class.');
                 }
 
-                // Create the booking
                 ClassBooking::create([
                     'customer_id' => $customerId,
-                    'schedule_id' => $schedule->schedule_id,
-                    'status' => 'confirmed',
+                    'schedule_id' => $locked->schedule_id,
+                    'status'      => 'confirmed',
                 ]);
 
-                // Decrement available slots securely
-                $schedule->decrement('available_slots');
-                
                 Log::info("Booking successful", [
-                    'schedule_id' => $schedule->schedule_id,
-                    'customer_id' => $customerId,
-                    'remaining_slots' => $schedule->available_slots - 1
+                    'schedule_id'           => $locked->schedule_id,
+                    'customer_id'           => $customerId,
+                    'slots_remaining_after' => $locked->available_slots - $confirmedBookings - 1,
                 ]);
             });
 
@@ -163,7 +183,7 @@ class CustomerBookingController extends Controller
             Log::error('SMTP Email failed to send: ' . $e->getMessage());
         }
 
-        return redirect()->route('customer.dashboard')->with('success', 'Class booked successfully!');
+        return redirect()->route('customer.bookings.index')->with('success', 'Class booked successfully!');
     }
 
     public function myBookings()
@@ -224,9 +244,10 @@ class CustomerBookingController extends Controller
                 ->with('error', 'Please complete your customer profile first.');
         }
 
-        $customerId = (int) $customerProfile->customer_id;
+        $customerId = $customerProfile->customer_id;
 
-        if ((int) $booking->customer_id !== $customerId) {
+        // Ensure both values are compared as the same type
+        if ((string) $booking->customer_id !== (string) $customerId) {
             abort(403, 'Unauthorized action. This booking does not belong to your profile.');
         }
 
@@ -242,15 +263,10 @@ class CustomerBookingController extends Controller
 
         // Use transaction here as well to ensure DB consistency when freeing up slots
         DB::transaction(function () use ($booking) {
-            // Update status first and save — do NOT soft-delete so the record
-            // remains visible in the Past & Cancelled tab and re-booking works cleanly.
+            // Update status to cancelled — the slot automatically becomes
+            // available again because remaining slots are computed from booking count
             $booking->status = ClassBooking::STATUS_CANCELLED;
             $booking->save();
-
-            // Give the slot back - but only if the schedule still exists
-            if ($booking->schedule) {
-                $booking->schedule->increment('available_slots');
-            }
         });
 
         // Load relationships needed for the cancellation email

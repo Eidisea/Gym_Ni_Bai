@@ -103,19 +103,15 @@
             </div>
 
             <div class="md:col-span-2">
-                <label for="available_slots" class="block text-sm font-medium text-gray-300 mb-1.5">
-                    Available Slots <span class="text-red-400">*</span>
+                <label class="block text-sm font-medium text-gray-300 mb-1.5">
+                    Capacity
                 </label>
-                <input type="number" name="available_slots" id="available_slots" 
-                       value="{{ old('available_slots', $classSchedule->available_slots) }}"
-                       min="1" max="50"
-                       class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                       required>
-                @error('available_slots')
-                    <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
-                @enderror
+                <div class="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg text-sm text-gray-300 cursor-not-allowed">
+                    {{ $classSchedule->available_slots }} total slots (set by the fitness class)
+                </div>
                 <p class="mt-1 text-xs text-gray-400">
-                    Currently {{ $classSchedule->booked_slots }} slots booked. Cannot reduce below this number.
+                    {{ $classSchedule->booked_slots }} booked · {{ $classSchedule->remaining_slots }} remaining.
+                    Capacity is controlled by the fitness class's max participants setting.
                 </p>
             </div>
         </div>

@@ -51,7 +51,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('customer/profile', [CustomerProfileController::class, 'editProfile'])->name('customer.profile.edit');
     Route::put('customer/profile', [CustomerProfileController::class, 'updateProfile'])->name('customer.profile.update');
     Route::get('gym_ni_bai-classes', [CustomerBookingController::class, 'index'])->name('customer.classes.index');
-    Route::post('gym_ni_bai-classes/{classSchedule}/book', [CustomerBookingController::class, 'store'])->name('customer.classes.book');
+    Route::post('gym_ni_bai-classes/{scheduleId}/book', [CustomerBookingController::class, 'store'])->name('customer.classes.book');
     Route::get('gym_ni_bai-my-bookings', [CustomerBookingController::class, 'myBookings'])->name('customer.bookings.index');
     Route::post('gym_ni_bai-my-bookings/{classBooking}/cancel', [CustomerBookingController::class, 'cancelBooking'])->name('customer.bookings.cancel');
     Route::get('gym_ni_bai-billing', [CustomerBillingController::class, 'index'])->name('customer.billing.index');

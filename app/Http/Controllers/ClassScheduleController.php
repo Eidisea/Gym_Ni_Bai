@@ -131,12 +131,17 @@ class ClassScheduleController extends Controller
         }
 
         $validated = $request->validate([
-            'class_id' => ['required', 'exists:fitness_classes,class_id'],
+            'class_id'   => ['required', 'exists:fitness_classes,class_id'],
             'trainer_id' => ['required', 'exists:trainer_profiles,trainer_id'],
             'start_time' => ['required', 'date'],
-            'end_time' => ['required', 'date', 'after:start_time'],
-            'available_slots' => ['required', 'integer', 'min:1', 'max:50'],
+            'end_time'   => ['required', 'date', 'after:start_time'],
         ]);
+
+        // Always re-sync available_slots from the fitness class's max_participants.
+        // available_slots is the total capacity — it must not be editable independently,
+        // otherwise it corrupts the remaining-slots calculation.
+        $fitnessClass = \App\Models\FitnessClass::findOrFail($validated['class_id']);
+        $validated['available_slots'] = $fitnessClass->max_participants;
 
         $classSchedule->update($validated);
 
