@@ -188,6 +188,12 @@ class CustomerProfileController extends Controller
         $user = Auth::user();
         $customerProfile = $user->customerProfile;
 
+        // Handle case where user doesn't have a customer profile
+        if (!$customerProfile) {
+            return redirect()->route('customer.profile.edit')
+                ->with('error', 'Please complete your customer profile first.');
+        }
+
         $activeSubscription = $customerProfile->subscriptions()
             ->with(['plan' => fn($q) => $q->withTrashed()])
             ->where('status', 'active')
@@ -225,24 +231,62 @@ class CustomerProfileController extends Controller
 
     public function editProfile()
     {
-        $customerProfile = Auth::user()->customerProfile;
+        $user = Auth::user();
+        
+        if (!$user || !$user->user_id) {
+            return redirect()->route('customer.login')
+                ->with('error', 'Please log in to access your profile.');
+        }
+        
+        $customerProfile = $user->customerProfile;
+        
+        // If no customer profile exists, show the form with empty data
+        // Don't auto-create profile here, let the user fill the form first
+        if (!$customerProfile) {
+            $customerProfile = new CustomerProfile([
+                'user_id' => $user->user_id,
+                'first_name' => '',
+                'last_name' => '',
+                'phone_number' => '',
+                'date_of_birth' => null,
+            ]);
+        }
+        
         return view('customer.profile', compact('customerProfile'));
     }
 
     public function updateProfile(Request $request)
     {
-        $customerProfile = Auth::user()->customerProfile;
+        $user = Auth::user();
+        
+        if (!$user || !$user->user_id) {
+            return redirect()->route('customer.login')
+                ->with('error', 'Please log in to access your profile.');
+        }
+        
+        $customerProfile = $user->customerProfile;
 
         $validated = $request->validate([
             'first_name' => ['required', 'string', 'max:50'],
             'last_name' => ['required', 'string', 'max:50'],
             'phone_number' => ['required', 'string', 'max:20', 
-                'unique:customer_profiles,phone_number,' . $customerProfile->customer_id . ',customer_id'
+                $customerProfile ? 'unique:customer_profiles,phone_number,' . $customerProfile->customer_id . ',customer_id' : 'unique:customer_profiles,phone_number'
             ],
             'date_of_birth' => ['required', 'date', 'before:today'],
         ]);
 
-        $customerProfile->update($validated);
+        // If no customer profile exists, create one with the validated data
+        if (!$customerProfile) {
+            $customerProfile = CustomerProfile::create([
+                'user_id' => $user->user_id,
+                'first_name' => $validated['first_name'],
+                'last_name' => $validated['last_name'],
+                'phone_number' => $validated['phone_number'],
+                'date_of_birth' => $validated['date_of_birth'],
+            ]);
+        } else {
+            $customerProfile->update($validated);
+        }
 
         return redirect()->back()->with('success', 'Profile updated successfully.');
     }

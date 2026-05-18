@@ -8,7 +8,7 @@
     ================================================================ --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-3xl font-bold text-slate-900">Welcome back, {{ Auth::user()->customerProfile->first_name ?? Auth::user()->name }}!</h1>
+            <h1 class="text-3xl font-bold text-slate-900">Welcome back, {{ Auth::user()->customerProfile?->first_name ?? Auth::user()->name }}!</h1>
             <p class="mt-1 text-slate-500">Here's what's going on with your membership.</p>
         </div>
         <a href="{{ route('customer.classes.index') }}" class="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition">

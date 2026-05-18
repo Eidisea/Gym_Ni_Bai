@@ -16,7 +16,14 @@ class CustomerBillingController extends Controller
 {
     public function index()
     {
-        $customerId = Auth::user()->customerProfile->customer_id;
+        $customerProfile = Auth::user()->customerProfile;
+        
+        if (!$customerProfile) {
+            return redirect()->route('customer.profile.edit')
+                ->with('error', 'Please complete your customer profile first.');
+        }
+
+        $customerId = $customerProfile->customer_id;
 
         $activeSubscription = MembershipSubscription::with(['plan' => fn($q) => $q->withTrashed()])
             ->where('customer_id', $customerId)
@@ -61,7 +68,14 @@ class CustomerBillingController extends Controller
             'account_identifier' => ['nullable', 'string', 'max:100'],
         ]);
 
-        $customerId = Auth::user()->customerProfile->customer_id;
+        $customerProfile = Auth::user()->customerProfile;
+        
+        if (!$customerProfile) {
+            return redirect()->route('customer.profile.edit')
+                ->with('error', 'Please complete your customer profile first.');
+        }
+
+        $customerId = $customerProfile->customer_id;
         $plan       = MembershipPlan::findOrFail($validated['plan_id']);
 
         DB::transaction(function () use ($validated, $customerId, $plan) {
@@ -112,7 +126,14 @@ class CustomerBillingController extends Controller
 
     public function cancelSubscription()
     {
-        $customerId = Auth::user()->customerProfile->customer_id;
+        $customerProfile = Auth::user()->customerProfile;
+        
+        if (!$customerProfile) {
+            return redirect()->route('customer.profile.edit')
+                ->with('error', 'Please complete your customer profile first.');
+        }
+
+        $customerId = $customerProfile->customer_id;
 
         $activeSubscription = MembershipSubscription::where('customer_id', $customerId)
             ->where('status', 'active')

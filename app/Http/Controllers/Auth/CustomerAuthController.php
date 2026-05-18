@@ -133,7 +133,7 @@ class CustomerAuthController extends Controller
         $request->session()->regenerateToken();
 
         if ($role === 'Customer') {
-            return redirect()->route('customer.login');
+            return redirect()->route('home');
         } else {
             return redirect()->route('management.login');
         }

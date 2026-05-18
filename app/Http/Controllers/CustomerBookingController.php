@@ -24,7 +24,14 @@ class CustomerBookingController extends Controller
             ->orderBy('start_time', 'asc')
             ->get();
 
-        $customerId = Auth::user()->customerProfile->customer_id;
+        $customerProfile = Auth::user()->customerProfile;
+        
+        if (!$customerProfile) {
+            return redirect()->route('customer.profile.edit')
+                ->with('error', 'Please complete your customer profile first.');
+        }
+
+        $customerId = $customerProfile->customer_id;
 
         $userBookings = ClassBooking::where('customer_id', $customerId)
             ->where('status', 'confirmed')
@@ -41,7 +48,32 @@ class CustomerBookingController extends Controller
 
     public function store(Request $request, ClassSchedule $schedule)
     {
-        $customerId = Auth::user()->customerProfile->customer_id;
+        $customerProfile = Auth::user()->customerProfile;
+        
+        if (!$customerProfile) {
+            return redirect()->route('customer.profile.edit')
+                ->with('error', 'Please complete your customer profile first.');
+        }
+
+        $customerId = $customerProfile->customer_id;
+
+        // Log initial state for debugging
+        Log::info("Booking attempt started", [
+            'schedule_id' => $schedule->schedule_id,
+            'customer_id' => $customerId,
+            'initial_available_slots' => $schedule->available_slots,
+            'schedule_exists' => $schedule->exists,
+            'schedule_deleted_at' => $schedule->deleted_at
+        ]);
+
+        // Verify the schedule exists and is not soft-deleted
+        if (!$schedule || $schedule->trashed()) {
+            Log::warning("Schedule not available", [
+                'schedule_id' => $schedule->schedule_id ?? 'null',
+                'trashed' => $schedule->trashed() ?? 'unknown'
+            ]);
+            return redirect()->back()->with('error', 'This class schedule is no longer available.');
+        }
 
         // Guard: active membership required to book a class
         $hasActiveMembership = MembershipSubscription::where('customer_id', $customerId)
@@ -55,22 +87,27 @@ class CustomerBookingController extends Controller
         }
 
         try {
-            // FIX 1: Database Transaction & Pessimistic Locking
-            // We wrap this in a transaction so if two users click at the exact same millisecond,
-            // the database queues them up safely instead of double-booking.
+            // Simple transaction without complex re-querying
             DB::transaction(function () use ($schedule, $customerId) {
                 
-                // Re-query the schedule to lock the row while we do the math
-                $lockedSchedule = ClassSchedule::where('schedule_id', $schedule->schedule_id)
-                    ->lockForUpdate()
-                    ->first();
-
-                if ($lockedSchedule->available_slots <= 0) {
+                // Refresh the schedule model to get the latest data from database
+                $schedule->refresh();
+                
+                // Log current state
+                Log::info("Inside transaction", [
+                    'schedule_id' => $schedule->schedule_id,
+                    'available_slots' => $schedule->available_slots,
+                    'customer_id' => $customerId
+                ]);
+                
+                // Check if the schedule is available for booking
+                if ($schedule->available_slots <= 0) {
                     throw new \Exception('This class is full.');
                 }
 
+                // Check for existing booking
                 $existingBooking = ClassBooking::where('customer_id', $customerId)
-                    ->where('schedule_id', $lockedSchedule->schedule_id)
+                    ->where('schedule_id', $schedule->schedule_id)
                     ->where('status', 'confirmed')
                     ->first();
 
@@ -78,17 +115,31 @@ class CustomerBookingController extends Controller
                     throw new \Exception('You are already booked for this class.');
                 }
 
+                // Create the booking
                 ClassBooking::create([
                     'customer_id' => $customerId,
-                    'schedule_id' => $lockedSchedule->schedule_id,
+                    'schedule_id' => $schedule->schedule_id,
                     'status' => 'confirmed',
                 ]);
 
                 // Decrement available slots securely
-                $lockedSchedule->decrement('available_slots');
+                $schedule->decrement('available_slots');
+                
+                Log::info("Booking successful", [
+                    'schedule_id' => $schedule->schedule_id,
+                    'customer_id' => $customerId,
+                    'remaining_slots' => $schedule->available_slots - 1
+                ]);
             });
 
         } catch (\Exception $e) {
+            // Log the error for debugging
+            Log::error("Booking failed", [
+                'error' => $e->getMessage(),
+                'schedule_id' => $schedule->schedule_id,
+                'customer_id' => $customerId
+            ]);
+            
             // If the transaction throws an error (like "This class is full"), catch it and send it to the view
             return redirect()->back()->with('error', $e->getMessage());
         }
@@ -117,7 +168,14 @@ class CustomerBookingController extends Controller
 
     public function myBookings()
     {
-        $customerId = Auth::user()->customerProfile->customer_id;
+        $customerProfile = Auth::user()->customerProfile;
+        
+        if (!$customerProfile) {
+            return redirect()->route('customer.profile.edit')
+                ->with('error', 'Please complete your customer profile first.');
+        }
+
+        $customerId = $customerProfile->customer_id;
 
         $upcoming = ClassBooking::with([
             'schedule' => fn($q) => $q->withTrashed()->with([
@@ -159,7 +217,14 @@ class CustomerBookingController extends Controller
 
     public function cancelBooking(Request $request, ClassBooking $booking)
     {
-        $customerId = (int) Auth::user()->customerProfile->customer_id;
+        $customerProfile = Auth::user()->customerProfile;
+        
+        if (!$customerProfile) {
+            return redirect()->route('customer.profile.edit')
+                ->with('error', 'Please complete your customer profile first.');
+        }
+
+        $customerId = (int) $customerProfile->customer_id;
 
         if ((int) $booking->customer_id !== $customerId) {
             abort(403, 'Unauthorized action. This booking does not belong to your profile.');
@@ -182,8 +247,10 @@ class CustomerBookingController extends Controller
             $booking->status = ClassBooking::STATUS_CANCELLED;
             $booking->save();
 
-            // Give the slot back
-            $booking->schedule->increment('available_slots');
+            // Give the slot back - but only if the schedule still exists
+            if ($booking->schedule) {
+                $booking->schedule->increment('available_slots');
+            }
         });
 
         // Load relationships needed for the cancellation email

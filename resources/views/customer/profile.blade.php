@@ -125,7 +125,7 @@
                     <input 
                         type="email" 
                         id="email" 
-                        value="{{ $customerProfile->user->email }}"
+                        value="{{ $customerProfile->user?->email ?? Auth::user()->email }}"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm bg-gray-50 text-gray-500"
                         readonly
                     >
@@ -161,11 +161,11 @@
                 <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Member Since</dt>
-                        <dd class="mt-1 text-sm text-gray-900">{{ $customerProfile->created_at->format('F j, Y') }}</dd>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $customerProfile->created_at ? $customerProfile->created_at->format('F j, Y') : 'Not yet registered' }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Customer ID</dt>
-                        <dd class="mt-1 text-sm text-gray-900">#{{ str_pad($customerProfile->customer_id, 6, '0', STR_PAD_LEFT) }}</dd>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $customerProfile->customer_id ? '#' . str_pad($customerProfile->customer_id, 6, '0', STR_PAD_LEFT) : 'Not assigned yet' }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Account Status</dt>
@@ -177,7 +177,7 @@
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
-                        <dd class="mt-1 text-sm text-gray-900">{{ $customerProfile->updated_at->format('F j, Y g:i A') }}</dd>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $customerProfile->updated_at ? $customerProfile->updated_at->format('F j, Y g:i A') : 'Never updated' }}</dd>
                     </div>
                 </dl>
             </div>
