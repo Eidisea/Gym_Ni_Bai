@@ -17,18 +17,18 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Providers\ProductionConfigServiceProvider::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
-        // Trust all proxies (Cloudflare + Render double proxy setup)
-        $middleware->trustProxies(at: '*');
+        // Temporarily disable proxy trust to test session issues
+        // $middleware->trustProxies(at: '*');
         
         // Trust specific proxy headers for Cloudflare + Render
-        $middleware->trustProxies(
-            at: '*',
-            headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR |
-                    \Illuminate\Http\Request::HEADER_X_FORWARDED_HOST |
-                    \Illuminate\Http\Request::HEADER_X_FORWARDED_PORT |
-                    \Illuminate\Http\Request::HEADER_X_FORWARDED_PROTO |
-                    \Illuminate\Http\Request::HEADER_X_FORWARDED_AWS_ELB
-        );
+        // $middleware->trustProxies(
+        //     at: '*',
+        //     headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR |
+        //             \Illuminate\Http\Request::HEADER_X_FORWARDED_HOST |
+        //             \Illuminate\Http\Request::HEADER_X_FORWARDED_PORT |
+        //             \Illuminate\Http\Request::HEADER_X_FORWARDED_PROTO |
+        //             \Illuminate\Http\Request::HEADER_X_FORWARDED_AWS_ELB
+        // );
         
         // Temporarily disable CSRF protection until session configuration is fixed
         $middleware->validateCsrfTokens(except: [

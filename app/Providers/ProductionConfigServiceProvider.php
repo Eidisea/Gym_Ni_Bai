@@ -20,26 +20,23 @@ class ProductionConfigServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Force HTTPS detection for session cookies in production
-        if ($this->app->environment('production') || request()->header('x-forwarded-proto') === 'https') {
-            URL::forceScheme('https');
-        }
-        
-        // Set session configuration for Cloudflare + Render environment
-        // This overrides the config values to ensure proper session handling
+        // Only apply configuration in production
         if ($this->app->environment('production')) {
+            // Force HTTPS scheme
+            URL::forceScheme('https');
+            
+            // Set the most basic session configuration that should work
             config([
-                'session.secure' => true,
-                'session.same_site' => 'none',
-                'session.domain' => null, // Use current domain instead of .onrender.com
+                'session.driver' => 'file',
+                'session.secure' => false, // Try without secure first
+                'session.same_site' => 'lax',
+                'session.domain' => null,
                 'session.http_only' => true,
-                'session.partitioned' => false,
+                'session.lifetime' => 120,
             ]);
             
-            // Also ensure app URL is HTTPS
-            if (!str_starts_with(config('app.url'), 'https://')) {
-                config(['app.url' => 'https://gym-ni-bai.onrender.com']);
-            }
+            // Ensure app URL is HTTPS
+            config(['app.url' => 'https://gym-ni-bai.onrender.com']);
         }
     }
 }

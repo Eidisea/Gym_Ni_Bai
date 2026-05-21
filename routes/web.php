@@ -79,6 +79,20 @@ Route::get('/debug-auth', function () {
     ]);
 })->middleware('web');
 
+// Simple session test route
+Route::get('/test-session', function () {
+    $counter = session('counter', 0);
+    session(['counter' => $counter + 1]);
+    
+    return response()->json([
+        'message' => 'Session test',
+        'counter' => session('counter'),
+        'session_id' => session()->getId(),
+        'session_works' => session('counter') > $counter,
+        'all_session_data' => session()->all(),
+    ]);
+})->middleware('web');
+
 // =============================================================================
 // PUBLIC LANDING PAGE
 // =============================================================================
