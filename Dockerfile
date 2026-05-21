@@ -43,6 +43,9 @@ WORKDIR /var/www/html
 # Copy Laravel app
 COPY . .
 
+# FIX: Remove any cached config files that might have been copied from local
+RUN rm -rf bootstrap/cache/*.php
+
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
