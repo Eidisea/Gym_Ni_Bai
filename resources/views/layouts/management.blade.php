@@ -89,8 +89,7 @@
                     </a>
                 </div>
 
-                <!-- Staff Management (Admin Only) -->
-                @can('admin-only')
+                <!-- Staff Management -->
                 <div class="space-y-0.5">
                     <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-1.5">
                         Staff Management
@@ -111,6 +110,7 @@
                         </svg>
                         Trainer Profiles
                     </a>
+                    @can('admin-only')
                     <a href="{{ route('management.roles.index') }}" 
                        class="flex items-center px-2 py-1.5 text-sm font-medium rounded-lg transition-colors
                               {{ request()->routeIs('management.roles.*') ? 'bg-indigo-600 text-white' : 'text-gray-300 hover:bg-slate-700 hover:text-white' }}">
@@ -119,15 +119,14 @@
                         </svg>
                         Roles & Permissions
                     </a>
+                    @endcan
                 </div>
-                @endcan
 
                 <!-- Financial Management -->
                 <div class="space-y-0.5">
                     <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-1.5">
                         Financial Management
                     </div>
-                    @can('admin-only')
                     <a href="{{ route('management.membership-plans.index') }}" 
                        class="flex items-center px-2 py-1.5 text-sm font-medium rounded-lg transition-colors
                               {{ request()->routeIs('management.membership-plans.*') ? 'bg-indigo-600 text-white' : 'text-gray-300 hover:bg-slate-700 hover:text-white' }}">
@@ -137,7 +136,6 @@
                         </svg>
                         Membership Plans
                     </a>
-                    @endcan
                     <a href="{{ route('management.payment-transactions.index') }}" 
                        class="flex items-center px-2 py-1.5 text-sm font-medium rounded-lg transition-colors
                               {{ request()->routeIs('management.payment-transactions.*') && !request()->routeIs('management.payment-transactions.cash-process') ? 'bg-indigo-600 text-white' : 'text-gray-300 hover:bg-slate-700 hover:text-white' }}">
