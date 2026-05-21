@@ -25,10 +25,10 @@ class ProductionConfigServiceProvider extends ServiceProvider
             // Force HTTPS scheme
             URL::forceScheme('https');
             
-            // Set the most basic session configuration that should work
+            // Set session configuration for Cloudflare + Render
             config([
                 'session.driver' => 'file',
-                'session.secure' => false, // Try without secure first
+                'session.secure' => true, // Now use secure since proxy trust is enabled
                 'session.same_site' => 'lax',
                 'session.domain' => null,
                 'session.http_only' => true,

@@ -90,6 +90,11 @@ Route::get('/test-session', function () {
         'session_id' => session()->getId(),
         'session_works' => session('counter') > $counter,
         'all_session_data' => session()->all(),
+        'request_secure' => request()->isSecure(),
+        'proxy_headers' => [
+            'x-forwarded-proto' => request()->header('x-forwarded-proto'),
+            'cf-visitor' => request()->header('cf-visitor'),
+        ],
     ]);
 })->middleware('web');
 
