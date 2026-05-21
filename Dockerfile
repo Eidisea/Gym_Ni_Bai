@@ -59,7 +59,8 @@ RUN npm install && npm run build
 RUN mkdir -p storage/framework/cache storage/framework/sessions \
     storage/framework/views bootstrap/cache public/uploads \
     && chown -R www-data:www-data storage bootstrap/cache public/uploads \
-    && chmod -R 775 storage bootstrap/cache public/uploads
+    && chmod -R 775 storage bootstrap/cache public/uploads \
+    && chmod -R 777 storage/framework/sessions
 
 # Clear any cached files from local development
 RUN rm -rf bootstrap/cache/*.php
@@ -109,6 +110,11 @@ php artisan config:clear || true\n\
 php artisan route:clear || true\n\
 php artisan view:clear || true\n\
 php artisan optimize:clear || true\n\
+\n\
+# Create sessions table if using database sessions\n\
+echo "Ensuring sessions table exists..."\n\
+php artisan session:table || echo "Sessions table command failed"\n\
+php artisan migrate --force || echo "Migration failed, continuing..."\n\
 \n\
 # Create storage symlink\n\
 echo "Creating storage symlink..."\n\

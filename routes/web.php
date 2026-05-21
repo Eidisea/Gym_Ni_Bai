@@ -91,11 +91,61 @@ Route::get('/test-session', function () {
         'session_works' => session('counter') > $counter,
         'all_session_data' => session()->all(),
         'request_secure' => request()->isSecure(),
+        'session_driver' => config('session.driver'),
         'proxy_headers' => [
             'x-forwarded-proto' => request()->header('x-forwarded-proto'),
             'cf-visitor' => request()->header('cf-visitor'),
         ],
     ]);
+})->middleware('web');
+
+// Comprehensive session debug route
+Route::get('/debug-session-full', function () {
+    try {
+        // Test session operations
+        $oldCounter = session('test_counter', 0);
+        session(['test_counter' => $oldCounter + 1]);
+        session()->save(); // Force save
+        
+        $newCounter = session('test_counter');
+        
+        return response()->json([
+            'session_test' => [
+                'old_counter' => $oldCounter,
+                'new_counter' => $newCounter,
+                'increment_worked' => $newCounter > $oldCounter,
+            ],
+            'session_info' => [
+                'id' => session()->getId(),
+                'name' => session()->getName(),
+                'driver' => config('session.driver'),
+                'all_data' => session()->all(),
+            ],
+            'config' => [
+                'session_driver' => config('session.driver'),
+                'session_table' => config('session.table'),
+                'session_connection' => config('session.connection'),
+                'session_files' => config('session.files'),
+                'session_secure' => config('session.secure'),
+                'session_domain' => config('session.domain'),
+                'session_same_site' => config('session.same_site'),
+            ],
+            'request_info' => [
+                'secure' => request()->isSecure(),
+                'host' => request()->getHost(),
+                'url' => request()->url(),
+            ],
+            'database_test' => [
+                'can_connect' => true, // Will be set below
+                'sessions_table_exists' => false, // Will be set below
+            ],
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ], 500);
+    }
 })->middleware('web');
 
 // =============================================================================

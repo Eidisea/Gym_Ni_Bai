@@ -27,8 +27,8 @@ class ProductionConfigServiceProvider extends ServiceProvider
             
             // Set session configuration for Cloudflare + Render
             config([
-                'session.driver' => 'file',
-                'session.secure' => true, // Now use secure since proxy trust is enabled
+                'session.driver' => 'database', // Switch back to database sessions
+                'session.secure' => true, // Use secure since proxy trust is enabled
                 'session.same_site' => 'lax',
                 'session.domain' => null,
                 'session.http_only' => true,

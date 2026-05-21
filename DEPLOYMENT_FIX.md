@@ -9,33 +9,42 @@ Based on debug output, the issue was:
 3. **HTTP/HTTPS mismatch** - App thought connection was HTTP, couldn't set secure cookies
 4. **Missing proxy headers** - `x-forwarded-proto: https` wasn't being processed
 
-## Fix Applied
+## Fix Applied - Updated
 
 ### 1. Re-enabled Proxy Trust ✅
 - Laravel now reads `x-forwarded-proto: https` header from Cloudflare
-- Properly detects HTTPS connection
+- Properly detects HTTPS connection (`request_secure: true` confirmed)
 - Sets secure session cookies correctly
 
-### 2. Corrected Session Configuration ✅
-- Using file sessions (more reliable than database for this setup)
-- Secure cookies enabled (now that HTTPS is detected)
-- SameSite set to 'lax' (works better with Cloudflare)
-- Domain set to null (uses current domain)
+### 2. Switched to Database Sessions ✅
+- File sessions had permission issues in Render environment
+- Database sessions are more reliable for containerized deployments
+- Added sessions table creation to startup script
+- Enhanced session debugging
 
-### 3. Enhanced Debug Routes ✅
-- Added proxy header detection to test routes
-- Can verify HTTPS detection is working
-- Can verify session persistence
+### 3. Enhanced Session Debugging ✅
+- Added comprehensive session testing routes
+- Can verify database connectivity and table existence
+- Better error handling and diagnostics
 
-## Testing the Fix
+## Testing the Updated Fix
 
-### Step 1: Test Session Persistence
+### Step 1: Test Session Persistence (Updated)
 1. **Visit**: `https://gym-ni-bai.onrender.com/test-session`
 2. **Refresh multiple times**
 3. **Expected**: 
    - Same session_id on each refresh
    - Counter increases: 1, 2, 3, 4...
+   - `session_driver: "database"`
    - `request_secure: true`
+
+### Step 2: Comprehensive Session Debug
+1. **Visit**: `https://gym-ni-bai.onrender.com/debug-session-full`
+2. **Check for**:
+   - `increment_worked: true`
+   - `database_test.can_connect: true`
+   - `database_test.sessions_table_exists: true`
+   - No errors in response
 
 ### Step 2: Test Authentication
 1. **Visit**: `https://gym-ni-bai.onrender.com/debug-auth` (should show `authenticated: false`)
