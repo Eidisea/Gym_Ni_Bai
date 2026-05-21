@@ -51,7 +51,7 @@ SESSION_DRIVER=database
 SESSION_LIFETIME=120
 SESSION_ENCRYPT=false
 SESSION_PATH=/
-SESSION_DOMAIN=.onrender.com
+SESSION_DOMAIN=
 SESSION_SECURE_COOKIE=true
 SESSION_HTTP_ONLY=true
 SESSION_SAME_SITE=none
@@ -65,6 +65,8 @@ DB_USERNAME=your-db-user
 DB_PASSWORD=your-db-password
 ```
 
+**IMPORTANT**: Note that `SESSION_DOMAIN` should be empty (not `.onrender.com`). This allows the session to work with the current domain.
+
 ### 2. Deploy and Test
 
 1. **Commit and push these changes** to GitHub
@@ -72,22 +74,55 @@ DB_PASSWORD=your-db-password
 3. **The application should load without errors** now
 4. **Test the health endpoint**: Visit `https://gym-ni-bai.onrender.com/health`
 5. **Test the session debug endpoint**: Visit `https://gym-ni-bai.onrender.com/debug-session`
+6. **Test the auth debug endpoint**: Visit `https://gym-ni-bai.onrender.com/debug-auth`
 
-### 3. Test Authentication (Should Work Now)
+### 3. Debug Session Configuration
+
+After deployment, check the debug endpoints:
+
+**`/debug-session` should show:**
+```json
+{
+  "request_secure": true,
+  "session_config_runtime": {
+    "secure": true,
+    "same_site": "none",
+    "domain": null
+  }
+}
+```
+
+**`/debug-auth` should show (after login attempt):**
+```json
+{
+  "authenticated": true,
+  "user_id": 123,
+  "session_has_auth": true
+}
+```
+
+### 4. Test Authentication (Should Work Now)
 
 #### Customer Portal Testing:
 1. Go to `https://gym-ni-bai.onrender.com/gym_ni_bai-login`
-2. Login with customer credentials
-3. Should redirect to customer dashboard (`/customer/dashboard`)
-4. Try accessing management routes - should redirect back to customer dashboard
+2. **Before logging in**: Check `/debug-auth` - should show `"authenticated": false`
+3. Login with customer credentials
+4. **After logging in**: Check `/debug-auth` - should show `"authenticated": true`
+5. Should redirect to customer dashboard (`/customer/dashboard`) and stay there
+6. Try accessing management routes - should redirect back to customer dashboard
 
 #### Management Portal Testing:
 1. Go to `https://gym-ni-bai.onrender.com/gym_ni_bai-management/login`
 2. Login with admin/staff credentials
-3. Should redirect to management dashboard (`/management/dashboard`)
+3. Should redirect to management dashboard (`/management/dashboard`) and stay there
 4. Try accessing customer routes - should redirect back to management dashboard
 
-### 4. Re-enable CSRF Protection (After Session Works)
+#### If Login Still Loops:
+1. Check `/debug-session` - verify `session_config_runtime.domain` is `null`
+2. Check `/debug-auth` after login attempt - if `authenticated` is `false`, sessions aren't persisting
+3. Try clearing browser cookies completely and test in incognito mode
+
+### 5. Re-enable CSRF Protection (After Session Works)
 
 Once authentication is working properly and the `/debug-session` shows correct configuration:
 

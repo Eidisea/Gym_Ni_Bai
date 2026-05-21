@@ -58,9 +58,26 @@ Route::get('/debug-session', function () {
             'same_site' => config('session.same_site'),
             'domain' => config('session.domain'),
             'http_only' => config('session.http_only'),
-        ]
+        ],
+        'auth_check' => auth()->check(),
+        'user_id' => auth()->id(),
+        'session_data' => session()->all(),
     ]);
 });
+
+// Test authentication route
+Route::get('/debug-auth', function () {
+    return response()->json([
+        'authenticated' => auth()->check(),
+        'user_id' => auth()->id(),
+        'user_email' => auth()->user()?->email,
+        'user_role' => auth()->user()?->role?->role_name,
+        'session_id' => session()->getId(),
+        'session_has_auth' => session()->has('login_web_' . sha1('web')),
+        'guards' => array_keys(config('auth.guards')),
+        'default_guard' => config('auth.defaults.guard'),
+    ]);
+})->middleware('web');
 
 // =============================================================================
 // PUBLIC LANDING PAGE
