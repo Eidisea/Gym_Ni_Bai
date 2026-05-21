@@ -114,6 +114,10 @@ php artisan optimize:clear || true\n\
 echo "Creating storage symlink..."\n\
 php artisan storage:link || true\n\
 \n\
+# Test basic Laravel functionality\n\
+echo "Testing Laravel configuration..."\n\
+php artisan --version || echo "Laravel artisan test failed"\n\
+\n\
 echo "Laravel initialization complete. Starting Apache..."\n\
 \n\
 # Start Apache\n\

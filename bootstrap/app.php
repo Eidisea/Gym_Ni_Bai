@@ -13,6 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
         // Register your AuthServiceProvider so Gates & Policies load
         \App\Providers\AuthServiceProvider::class,
+        // Register production configuration provider
+        \App\Providers\ProductionConfigServiceProvider::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
         // Trust all proxies (Cloudflare + Render double proxy setup)
@@ -33,19 +35,8 @@ return Application::configure(basePath: dirname(__DIR__))
             '*' // Disable CSRF for all routes temporarily
         ]);
         
-        // Configure session for Cloudflare + Render environment
-        if (app()->environment('production')) {
-            // Force HTTPS detection for session cookies
-            \URL::forceScheme('https');
-            
-            // Set session configuration for production
-            config([
-                'session.secure' => true,
-                'session.same_site' => 'none',
-                'session.domain' => '.onrender.com',
-                'session.http_only' => true,
-            ]);
-        }
+        // Session configuration will be handled by environment variables
+        // No runtime configuration changes needed here
         
         // Authentication redirects are handled in individual controllers
         // No global redirects to avoid conflicts between customer/management portals

@@ -1,22 +1,22 @@
-# Gym Ni Bai - Docker Build & Authentication Fix
+# Gym Ni Bai - Docker Build & Runtime Fix
 
-## Current Status: Fixed Docker Build Issue
+## Current Status: Fixed Runtime Environment Issue
 
-The Docker build was failing with multiple errors:
-1. "Class 'env' does not exist" error during composer install
-2. ".env.example not found" error due to .dockerignore
-3. "php artisan key:generate" failing during build
+The application was deployed successfully but showing "Class 'env' does not exist" error at runtime. This was caused by trying to access the environment too early in the bootstrap process. Fixed by:
 
-All issues have been fixed by:
-1. Installing Composer dependencies without post-install scripts during build
-2. Fixing .dockerignore to allow .env.example file
-3. Moving ALL Laravel initialization (including key generation) to runtime
-4. Creating comprehensive startup script that handles all Laravel setup
-5. Avoiding artisan commands during Docker build entirely
+1. Removing environment checks from middleware configuration
+2. Moving session configuration to a proper service provider
+3. Ensuring environment is fully loaded before accessing it
 
 ## Issues Fixed
 
-### 1. Docker Build Issue Fixed ✅
+### 1. Runtime Environment Issue Fixed ✅
+- Fixed "Class 'env' does not exist" error at runtime
+- Moved session configuration to proper service provider
+- Removed problematic environment checks from middleware configuration
+- Created ProductionConfigServiceProvider for proper environment-based configuration
+
+### 2. Docker Build Issue Fixed ✅
 - Fixed "Class 'env' does not exist" error during composer install
 - Fixed ".env.example not found" error by updating .dockerignore
 - Fixed "php artisan key:generate" failing during build
@@ -25,15 +25,10 @@ All issues have been fixed by:
 - Created comprehensive startup script for runtime initialization
 - Avoided all artisan commands during Docker build
 
-### 2. Authentication Redirect Issues Fixed ✅
+### 3. Authentication Redirect Issues Fixed ✅
 - Added role-based middleware to customer routes to prevent cross-portal access
 - Fixed the `/login` route to intelligently redirect based on user role
 - Separated customer and management authentication flows properly
-
-### 3. Enhanced Session Configuration 🔄
-- Added runtime session configuration for production environment
-- Forces HTTPS scheme detection
-- Sets proper session cookie settings for Cloudflare + Render
 
 ### 4. CSRF Protection Status ⚠️
 - **Currently disabled** to prevent 419 errors
@@ -73,9 +68,10 @@ DB_PASSWORD=your-db-password
 ### 2. Deploy and Test
 
 1. **Commit and push these changes** to GitHub
-2. **Render will rebuild** with the fixed Dockerfile
-3. **The build should complete successfully** now
-4. **Test the session debug endpoint**: Visit `https://gym-ni-bai.onrender.com/debug-session`
+2. **Render will rebuild** with the fixed configuration
+3. **The application should load without errors** now
+4. **Test the health endpoint**: Visit `https://gym-ni-bai.onrender.com/health`
+5. **Test the session debug endpoint**: Visit `https://gym-ni-bai.onrender.com/debug-session`
 
 ### 3. Test Authentication (Should Work Now)
 
@@ -106,24 +102,38 @@ Once authentication is working properly and the `/debug-session` shows correct c
 3. **Deploy again**
 4. **Test forms** - they should work without 419 errors
 
+## Architecture Improvements
+
+### New Service Provider Approach
+- Created `ProductionConfigServiceProvider` to handle environment-specific configuration
+- Proper separation of concerns between middleware and service providers
+- Environment checks happen at the right time in the application lifecycle
+
+### Robust Startup Process
+- Comprehensive startup script with error handling
+- Environment variable validation
+- Laravel configuration testing
+- Graceful fallbacks for each initialization step
+
 ## Docker Build Improvements
 
-The new Dockerfile and .dockerignore:
+The new Dockerfile and configuration:
 - ✅ Fixed .dockerignore to allow .env.example while excluding other .env files
 - ✅ Completely avoids artisan commands during build (prevents container resolution issues)
 - ✅ Installs Composer dependencies without running problematic post-install scripts
 - ✅ Moves ALL Laravel initialization to runtime (key generation, cache clearing, etc.)
 - ✅ Creates comprehensive startup script with proper error handling
 - ✅ Handles .env file creation gracefully at runtime
-- ✅ Handles permissions properly
-- ✅ Uses multi-stage approach for better caching
+- ✅ Tests Laravel functionality during startup
+- ✅ Proper service provider architecture for environment-specific configuration
 
 ## Troubleshooting
 
-### If Build Still Fails:
-1. Check that all files are committed to Git
-2. Verify composer.json and composer.lock are present
-3. Check Render build logs for specific error messages
+### If Application Still Shows Errors:
+1. Check Render logs for startup script output
+2. Verify all environment variables are set correctly
+3. Test the `/health` endpoint to verify basic functionality
+4. Check the `/debug-session` endpoint for session configuration
 
 ### If Authentication Still Redirects Wrong:
 1. Clear browser cache and cookies completely
@@ -137,19 +147,20 @@ The new Dockerfile and .dockerignore:
 
 ## Files Modified
 
+- `bootstrap/app.php` - Removed problematic environment checks, added ProductionConfigServiceProvider
+- `app/Providers/ProductionConfigServiceProvider.php` - New service provider for environment-specific configuration
 - `.dockerignore` - Fixed to allow .env.example while excluding other .env files
 - `Dockerfile` - Complete rewrite to fix build issues and improve reliability
-- `bootstrap/app.php` - Added runtime session config, temporarily disabled CSRF
 - `routes/web.php` - Enhanced debug route, added role middleware to customer routes
 - `.env.example` - Updated with detailed session configuration comments
 
 ## Next Steps
 
-1. **Deploy these changes** (build should work now)
-2. **Update Render environment variables** (critical step)
-3. **Test `/debug-session` endpoint**
+1. **Deploy these changes** (application should load without errors now)
+2. **Test basic functionality** with `/health` endpoint
+3. **Test session configuration** with `/debug-session` endpoint
 4. **Test authentication flows**
 5. **Re-enable CSRF protection** once sessions work
 6. **Final testing** with CSRF enabled
 
-The Docker build should complete successfully now, and authentication redirects should work correctly. Once the session configuration is verified working, we can safely re-enable CSRF protection.
+The application should now load properly without the "Class 'env' does not exist" error, and all functionality should work correctly.
