@@ -28,19 +28,11 @@ return Application::configure(basePath: dirname(__DIR__))
                     \Illuminate\Http\Request::HEADER_X_FORWARDED_AWS_ELB
         );
         
-        // TEMPORARY: Exclude specific routes from CSRF protection for testing
-        $middleware->validateCsrfTokens(except: [
-            'gym_ni_bai-login',
-            'gym_ni_bai-register', 
-            'gym_ni_bai-management/login',
-            'gym_ni_bai-management/signup'
-        ]);
+        // CSRF protection is now re-enabled for all routes
+        // Session configuration in .env should handle the proxy issues
         
-        // Redirect guests to management login by default
-        $middleware->redirectGuestsTo(fn () => route('management.login'));
-        
-        // Redirect authenticated users to management dashboard by default
-        $middleware->redirectUsersTo(fn () => route('management.dashboard'));
+        // Authentication redirects are handled in individual controllers
+        // No global redirects to avoid conflicts between customer/management portals
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Log all exceptions for debugging

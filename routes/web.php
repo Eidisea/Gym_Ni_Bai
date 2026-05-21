@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\CustomerApiController;
 use App\Http\Controllers\ReportController;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 Route::aliasMiddleware('role', RoleMiddleware::class);
 
@@ -57,7 +58,19 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+// Default login route - redirect based on context or show selection
 Route::get('/login', function () {
+    // If user is already authenticated, redirect to appropriate dashboard
+    if (Auth::check()) {
+        $userRole = Auth::user()->role->role_name;
+        if ($userRole === 'Customer') {
+            return redirect()->route('customer.dashboard');
+        } elseif (in_array($userRole, ['Admin', 'Staff'])) {
+            return redirect()->route('management.dashboard');
+        }
+    }
+    
+    // Default to customer login for new users
     return redirect()->route('customer.login');
 })->name('login');
 
@@ -76,16 +89,20 @@ Route::middleware('guest')->group(function () {
 // =============================================================================
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('gym_ni_bai-logout', [CustomerAuthController::class, 'logout'])->name('customer.logout');
-    Route::get('customer/dashboard', [CustomerProfileController::class, 'dashboard'])->name('customer.dashboard');
-    Route::get('customer/profile', [CustomerProfileController::class, 'editProfile'])->name('customer.profile.edit');
-    Route::put('customer/profile', [CustomerProfileController::class, 'updateProfile'])->name('customer.profile.update');
-    Route::get('gym_ni_bai-classes', [CustomerBookingController::class, 'index'])->name('customer.classes.index');
-    Route::post('gym_ni_bai-classes/{scheduleId}/book', [CustomerBookingController::class, 'store'])->name('customer.classes.book');
-    Route::get('gym_ni_bai-my-bookings', [CustomerBookingController::class, 'myBookings'])->name('customer.bookings.index');
-    Route::post('gym_ni_bai-my-bookings/{bookingId}/cancel', [CustomerBookingController::class, 'cancelBooking'])->name('customer.bookings.cancel');
-    Route::get('gym_ni_bai-billing', [CustomerBillingController::class, 'index'])->name('customer.billing.index');
-    Route::post('gym_ni_bai-billing/renew', [CustomerBillingController::class, 'processRenewal'])->name('customer.billing.renew');
-    Route::post('gym_ni_bai-billing/cancel-subscription', [CustomerBillingController::class, 'cancelSubscription'])->name('customer.billing.cancel-subscription');
+    
+    // Customer-only routes (add role middleware to ensure only customers access these)
+    Route::middleware('role:customer')->group(function () {
+        Route::get('customer/dashboard', [CustomerProfileController::class, 'dashboard'])->name('customer.dashboard');
+        Route::get('customer/profile', [CustomerProfileController::class, 'editProfile'])->name('customer.profile.edit');
+        Route::put('customer/profile', [CustomerProfileController::class, 'updateProfile'])->name('customer.profile.update');
+        Route::get('gym_ni_bai-classes', [CustomerBookingController::class, 'index'])->name('customer.classes.index');
+        Route::post('gym_ni_bai-classes/{scheduleId}/book', [CustomerBookingController::class, 'store'])->name('customer.classes.book');
+        Route::get('gym_ni_bai-my-bookings', [CustomerBookingController::class, 'myBookings'])->name('customer.bookings.index');
+        Route::post('gym_ni_bai-my-bookings/{bookingId}/cancel', [CustomerBookingController::class, 'cancelBooking'])->name('customer.bookings.cancel');
+        Route::get('gym_ni_bai-billing', [CustomerBillingController::class, 'index'])->name('customer.billing.index');
+        Route::post('gym_ni_bai-billing/renew', [CustomerBillingController::class, 'processRenewal'])->name('customer.billing.renew');
+        Route::post('gym_ni_bai-billing/cancel-subscription', [CustomerBillingController::class, 'cancelSubscription'])->name('customer.billing.cancel-subscription');
+    });
 });
 
 // =============================================================================
