@@ -111,10 +111,9 @@ php artisan route:clear || true\n\
 php artisan view:clear || true\n\
 php artisan optimize:clear || true\n\
 \n\
-# Create sessions table if using database sessions\n\
-echo "Ensuring sessions table exists..."\n\
-php artisan session:table || echo "Sessions table command failed"\n\
-php artisan migrate --force || echo "Migration failed, continuing..."\n\
+# Run database migrations (including sessions table)\n\
+echo "Running database migrations..."\n\
+php artisan migrate --force || echo "Migration failed - database may not be available yet"\n\
 \n\
 # Create storage symlink\n\
 echo "Creating storage symlink..."\n\

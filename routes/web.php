@@ -99,6 +99,26 @@ Route::get('/test-session', function () {
     ]);
 })->middleware('web');
 
+// Manual migration route for debugging
+Route::get('/run-migrations', function () {
+    try {
+        \Artisan::call('migrate', ['--force' => true]);
+        $output = \Artisan::output();
+        
+        return response()->json([
+            'success' => true,
+            'output' => $output,
+            'sessions_table_exists' => \Schema::hasTable('sessions'),
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ], 500);
+    }
+});
+
 // Comprehensive session debug route
 Route::get('/debug-session-full', function () {
     try {
@@ -108,6 +128,16 @@ Route::get('/debug-session-full', function () {
         session()->save(); // Force save
         
         $newCounter = session('test_counter');
+        
+        // Check if sessions table exists
+        $sessionsTableExists = false;
+        $dbError = null;
+        try {
+            \DB::connection()->getPdo();
+            $sessionsTableExists = \Schema::hasTable('sessions');
+        } catch (\Exception $e) {
+            $dbError = $e->getMessage();
+        }
         
         return response()->json([
             'session_test' => [
@@ -136,8 +166,9 @@ Route::get('/debug-session-full', function () {
                 'url' => request()->url(),
             ],
             'database_test' => [
-                'can_connect' => true, // Will be set below
-                'sessions_table_exists' => false, // Will be set below
+                'can_connect' => $dbError === null,
+                'sessions_table_exists' => $sessionsTableExists,
+                'db_error' => $dbError,
             ],
         ]);
     } catch (\Exception $e) {
