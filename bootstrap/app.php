@@ -15,7 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Providers\AuthServiceProvider::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
-        // Trust all proxies (Cloudflare + Render)
+        // Trust all proxies (Cloudflare + Render double proxy setup)
         $middleware->trustProxies(at: '*');
         
         // Trust specific proxy headers for Cloudflare + Render
@@ -28,8 +28,24 @@ return Application::configure(basePath: dirname(__DIR__))
                     \Illuminate\Http\Request::HEADER_X_FORWARDED_AWS_ELB
         );
         
-        // CSRF protection is now re-enabled for all routes
-        // Session configuration in .env should handle the proxy issues
+        // Temporarily disable CSRF protection until session configuration is fixed
+        $middleware->validateCsrfTokens(except: [
+            '*' // Disable CSRF for all routes temporarily
+        ]);
+        
+        // Configure session for Cloudflare + Render environment
+        if (app()->environment('production')) {
+            // Force HTTPS detection for session cookies
+            \URL::forceScheme('https');
+            
+            // Set session configuration for production
+            config([
+                'session.secure' => true,
+                'session.same_site' => 'none',
+                'session.domain' => '.onrender.com',
+                'session.http_only' => true,
+            ]);
+        }
         
         // Authentication redirects are handled in individual controllers
         // No global redirects to avoid conflicts between customer/management portals

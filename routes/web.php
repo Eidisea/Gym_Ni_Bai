@@ -40,13 +40,24 @@ Route::get('/debug-session', function () {
         'session_driver' => config('session.driver'),
         'session_domain' => config('session.domain'),
         'session_secure' => config('session.secure'),
+        'session_same_site' => config('session.same_site'),
         'app_url' => config('app.url'),
+        'app_env' => config('app.env'),
         'request_secure' => request()->isSecure(),
         'request_host' => request()->getHost(),
+        'request_url' => request()->url(),
         'headers' => [
             'x-forwarded-proto' => request()->header('x-forwarded-proto'),
             'x-forwarded-host' => request()->header('x-forwarded-host'),
+            'x-forwarded-port' => request()->header('x-forwarded-port'),
             'cf-visitor' => request()->header('cf-visitor'),
+            'host' => request()->header('host'),
+        ],
+        'session_config_runtime' => [
+            'secure' => config('session.secure'),
+            'same_site' => config('session.same_site'),
+            'domain' => config('session.domain'),
+            'http_only' => config('session.http_only'),
         ]
     ]);
 });
