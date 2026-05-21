@@ -114,7 +114,7 @@
                         {{ $role->users_count }} {{ Str::plural('user', $role->users_count) }}
                     </td>
                     <td class="py-4 px-4 text-sm text-gray-300">
-                        {{ $role->created_at->format('M j, Y') }}
+                        {{ $role->created_at ? $role->created_at->format('M j, Y') : 'N/A' }}
                     </td>
                     <td class="py-4 px-4 text-sm text-gray-300">
                         <div class="flex items-center space-x-2">
