@@ -62,22 +62,30 @@ class CustomerBookingController extends Controller
         $schedule = ClassSchedule::where('schedule_id', $scheduleId)->first();
 
         // Log initial state for debugging
-        Log::info("Booking attempt started", [
-            'schedule_id' => $scheduleId,
-            'customer_id' => $customerId,
-            'schedule_found' => $schedule ? 'yes' : 'no',
-            'initial_available_slots' => $schedule ? $schedule->available_slots : 'N/A',
-            'schedule_exists' => $schedule ? $schedule->exists : false,
-            'schedule_deleted_at' => $schedule ? $schedule->deleted_at : 'N/A'
-        ]);
+        try {
+            Log::info("Booking attempt started", [
+                'schedule_id' => $scheduleId,
+                'customer_id' => $customerId,
+                'schedule_found' => $schedule ? 'yes' : 'no',
+                'initial_available_slots' => $schedule ? $schedule->available_slots : 'N/A',
+                'schedule_exists' => $schedule ? $schedule->exists : false,
+                'schedule_deleted_at' => $schedule ? $schedule->deleted_at : 'N/A'
+            ]);
+        } catch (\Exception $logError) {
+            // Ignore logging errors
+        }
 
         // Verify the schedule exists and is not soft-deleted
         if (!$schedule || $schedule->trashed()) {
-            Log::warning("Schedule not available", [
-                'schedule_id' => $scheduleId,
-                'schedule_found' => $schedule ? 'yes' : 'no',
-                'trashed' => $schedule ? $schedule->trashed() : 'unknown'
-            ]);
+            try {
+                Log::warning("Schedule not available", [
+                    'schedule_id' => $scheduleId,
+                    'schedule_found' => $schedule ? 'yes' : 'no',
+                    'trashed' => $schedule ? $schedule->trashed() : 'unknown'
+                ]);
+            } catch (\Exception $logError) {
+                // Ignore logging errors
+            }
             return redirect()->back()->with('error', 'This class schedule is no longer available.');
         }
 
@@ -117,13 +125,17 @@ class CustomerBookingController extends Controller
                     ->where('status', 'confirmed')
                     ->count();
 
-                Log::info("Inside transaction", [
-                    'schedule_id'      => $locked->schedule_id,
-                    'total_capacity'   => $locked->available_slots,
-                    'confirmed_booked' => $confirmedBookings,
-                    'slots_remaining'  => $locked->available_slots - $confirmedBookings,
-                    'customer_id'      => $customerId,
-                ]);
+                try {
+                    Log::info("Inside transaction", [
+                        'schedule_id'      => $locked->schedule_id,
+                        'total_capacity'   => $locked->available_slots,
+                        'confirmed_booked' => $confirmedBookings,
+                        'slots_remaining'  => $locked->available_slots - $confirmedBookings,
+                        'customer_id'      => $customerId,
+                    ]);
+                } catch (\Exception $logError) {
+                    // Ignore logging errors
+                }
 
                 if ($confirmedBookings >= $locked->available_slots) {
                     throw new \Exception('This class is full.');
@@ -145,20 +157,28 @@ class CustomerBookingController extends Controller
                     'status'      => 'confirmed',
                 ]);
 
-                Log::info("Booking successful", [
-                    'schedule_id'           => $locked->schedule_id,
-                    'customer_id'           => $customerId,
-                    'slots_remaining_after' => $locked->available_slots - $confirmedBookings - 1,
-                ]);
+                try {
+                    Log::info("Booking successful", [
+                        'schedule_id'           => $locked->schedule_id,
+                        'customer_id'           => $customerId,
+                        'slots_remaining_after' => $locked->available_slots - $confirmedBookings - 1,
+                    ]);
+                } catch (\Exception $logError) {
+                    // Ignore logging errors
+                }
             });
 
         } catch (\Exception $e) {
             // Log the error for debugging
-            Log::error("Booking failed", [
-                'error' => $e->getMessage(),
-                'schedule_id' => $schedule->schedule_id,
-                'customer_id' => $customerId
-            ]);
+            try {
+                Log::error("Booking failed", [
+                    'error' => $e->getMessage(),
+                    'schedule_id' => $schedule->schedule_id,
+                    'customer_id' => $customerId
+                ]);
+            } catch (\Exception $logError) {
+                // Ignore logging errors
+            }
             
             // If the transaction throws an error (like "This class is full"), catch it and send it to the view
             return redirect()->back()->with('error', $e->getMessage());
@@ -180,7 +200,11 @@ class CustomerBookingController extends Controller
         try {
             Mail::to(Auth::user()->email)->send(new \App\Mail\BookingConfirmed($booking));
         } catch (\Exception $e) {
-            Log::error('SMTP Email failed to send: ' . $e->getMessage());
+            try {
+                Log::error('SMTP Email failed to send: ' . $e->getMessage());
+            } catch (\Exception $logError) {
+                // Ignore logging errors
+            }
         }
 
         return redirect()->route('customer.bookings.index')->with('success', 'Class booked successfully!');
@@ -287,7 +311,11 @@ class CustomerBookingController extends Controller
         try {
             Mail::to(Auth::user()->email)->send(new \App\Mail\ClassCancelled($booking));
         } catch (\Exception $e) {
-            Log::error('SMTP Cancellation Email failed to send: ' . $e->getMessage());
+            try {
+                Log::error('SMTP Cancellation Email failed to send: ' . $e->getMessage());
+            } catch (\Exception $logError) {
+                // Ignore logging errors
+            }
         }
 
         return redirect()->back()->with('success', 'Booking successfully cancelled.');

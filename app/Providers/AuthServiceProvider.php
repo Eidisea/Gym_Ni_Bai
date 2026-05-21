@@ -65,6 +65,13 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         // =====================================================================
+        // GATE: management-access (for read operations accessible to both Admin and Staff)
+        // =====================================================================
+        Gate::define('management-access', function ($user) {
+            return $user->isAdmin() || $user->isStaff();
+        });
+
+        // =====================================================================
         // GATE: staff-or-admin (for read operations accessible to both)
         // =====================================================================
         Gate::define('staff-or-admin', function ($user) {

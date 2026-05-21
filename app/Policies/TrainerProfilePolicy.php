@@ -7,15 +7,15 @@ use App\Models\User;
 
 class TrainerProfilePolicy
 {
-    // Admin only — same rationale as StaffProfile
+    // Allow both Admin and Staff to view trainer profiles
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() || $user->isStaff();
     }
 
     public function view(User $user, TrainerProfile $profile): bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() || $user->isStaff();
     }
 
     public function create(User $user): bool

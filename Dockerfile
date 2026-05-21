@@ -58,7 +58,7 @@ RUN php artisan storage:link || true
 
 # Fix permissions
 RUN mkdir -p storage/framework/cache storage/framework/sessions \
-    storage/framework/views bootstrap/cache public/uploads \
+    storage/framework/views bootstrap/cache public/uploads storage/logs \
     && chown -R www-data:www-data storage bootstrap/cache public/uploads \
     && chmod -R 775 storage bootstrap/cache public/uploads
 

@@ -14,7 +14,8 @@ class StaffProfileController extends Controller
 {
     public function index(Request $request)
     {
-        Gate::authorize('admin-only');
+        // Allow both Admin and Staff to view staff profiles
+        Gate::authorize('management-access');
 
         $showArchived = $request->input('archived', false);
         $search = $request->input('search');
@@ -114,7 +115,8 @@ class StaffProfileController extends Controller
 
     public function show(int $id)
     {
-        Gate::authorize('admin-only');
+        // Allow both Admin and Staff to view staff profiles
+        Gate::authorize('management-access');
 
         $staffProfile = StaffProfile::withTrashed()->findOrFail($id);
 
