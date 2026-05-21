@@ -28,6 +28,14 @@ return Application::configure(basePath: dirname(__DIR__))
                     \Illuminate\Http\Request::HEADER_X_FORWARDED_AWS_ELB
         );
         
+        // TEMPORARY: Exclude specific routes from CSRF protection for testing
+        $middleware->validateCsrfTokens(except: [
+            'gym_ni_bai-login',
+            'gym_ni_bai-register', 
+            'gym_ni_bai-management/login',
+            'gym_ni_bai-management/signup'
+        ]);
+        
         // Redirect guests to management login by default
         $middleware->redirectGuestsTo(fn () => route('management.login'));
         
