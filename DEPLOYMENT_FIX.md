@@ -2,16 +2,19 @@
 
 ## Current Status: Fixed Docker Build Issue
 
-The Docker build was failing with "Class 'env' does not exist" error. This has been fixed by:
+The Docker build was failing with "Class 'env' does not exist" error and then with ".env.example not found". Both issues have been fixed by:
 1. Installing Composer dependencies without post-install scripts during build
-2. Creating a proper .env file during build process
-3. Moving cache clearing to runtime instead of build time
-4. Adding a startup script to handle initialization
+2. Fixing .dockerignore to allow .env.example file
+3. Adding fallback .env creation if .env.example is missing
+4. Moving cache clearing to runtime instead of build time
+5. Adding a startup script to handle initialization
 
 ## Issues Fixed
 
 ### 1. Docker Build Issue Fixed ✅
 - Fixed "Class 'env' does not exist" error during composer install
+- Fixed ".env.example not found" error by updating .dockerignore
+- Added fallback .env creation if .env.example is missing
 - Separated build-time and runtime operations
 - Added proper .env file handling during build
 - Created startup script for runtime initialization
@@ -99,7 +102,9 @@ Once authentication is working properly and the `/debug-session` shows correct c
 
 ## Docker Build Improvements
 
-The new Dockerfile:
+The new Dockerfile and .dockerignore:
+- ✅ Fixed .dockerignore to allow .env.example while excluding other .env files
+- ✅ Added fallback .env creation if .env.example is missing
 - ✅ Installs Composer dependencies without running problematic post-install scripts
 - ✅ Creates proper .env file during build
 - ✅ Generates application key during build
@@ -126,6 +131,7 @@ The new Dockerfile:
 
 ## Files Modified
 
+- `.dockerignore` - Fixed to allow .env.example while excluding other .env files
 - `Dockerfile` - Complete rewrite to fix build issues and improve reliability
 - `bootstrap/app.php` - Added runtime session config, temporarily disabled CSRF
 - `routes/web.php` - Enhanced debug route, added role middleware to customer routes

@@ -53,7 +53,22 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-script
 COPY . .
 
 # Create basic .env file for build (will be overridden by Render environment variables)
-RUN cp .env.example .env
+RUN if [ -f .env.example ]; then \
+        cp .env.example .env; \
+    else \
+        echo "APP_NAME=Laravel" > .env && \
+        echo "APP_ENV=production" >> .env && \
+        echo "APP_KEY=" >> .env && \
+        echo "APP_DEBUG=false" >> .env && \
+        echo "APP_URL=http://localhost" >> .env && \
+        echo "DB_CONNECTION=mysql" >> .env && \
+        echo "DB_HOST=127.0.0.1" >> .env && \
+        echo "DB_PORT=3306" >> .env && \
+        echo "DB_DATABASE=laravel" >> .env && \
+        echo "DB_USERNAME=root" >> .env && \
+        echo "DB_PASSWORD=" >> .env && \
+        echo "SESSION_DRIVER=database" >> .env; \
+    fi
 
 # Generate application key (required for Laravel to work)
 RUN php artisan key:generate --no-interaction

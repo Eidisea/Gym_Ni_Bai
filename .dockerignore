@@ -4,7 +4,11 @@
 
 # CRITICAL: Do not copy local environments to Render!
 .env
-.env.*
+.env.local
+.env.production
+.env.backup
+# But allow .env.example for Docker build
+!.env.example
 
 # Ignore locally compiled assets and caches
 /public/build/
