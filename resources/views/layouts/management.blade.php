@@ -89,7 +89,8 @@
                     </a>
                 </div>
 
-                <!-- Staff Management -->
+                <!-- Staff Management (Admin Only) -->
+                @if(auth()->user()->isAdmin())
                 <div class="space-y-0.5">
                     <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-1.5">
                         Staff Management
@@ -110,7 +111,6 @@
                         </svg>
                         Trainer Profiles
                     </a>
-                    @can('admin-only')
                     <a href="{{ route('management.roles.index') }}" 
                        class="flex items-center px-2 py-1.5 text-sm font-medium rounded-lg transition-colors
                               {{ request()->routeIs('management.roles.*') ? 'bg-indigo-600 text-white' : 'text-gray-300 hover:bg-slate-700 hover:text-white' }}">
@@ -119,14 +119,15 @@
                         </svg>
                         Roles & Permissions
                     </a>
-                    @endcan
                 </div>
+                @endif
 
                 <!-- Financial Management -->
                 <div class="space-y-0.5">
                     <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-1.5">
                         Financial Management
                     </div>
+                    @if(auth()->user()->isAdmin())
                     <a href="{{ route('management.membership-plans.index') }}" 
                        class="flex items-center px-2 py-1.5 text-sm font-medium rounded-lg transition-colors
                               {{ request()->routeIs('management.membership-plans.*') ? 'bg-indigo-600 text-white' : 'text-gray-300 hover:bg-slate-700 hover:text-white' }}">
@@ -136,6 +137,7 @@
                         </svg>
                         Membership Plans
                     </a>
+                    @endif
                     <a href="{{ route('management.payment-transactions.index') }}" 
                        class="flex items-center px-2 py-1.5 text-sm font-medium rounded-lg transition-colors
                               {{ request()->routeIs('management.payment-transactions.*') && !request()->routeIs('management.payment-transactions.cash-process') ? 'bg-indigo-600 text-white' : 'text-gray-300 hover:bg-slate-700 hover:text-white' }}">
@@ -144,7 +146,7 @@
                         </svg>
                         Payment Transactions
                     </a>
-                    @unless(auth()->user()->role->role_name === 'Admin')
+                    @if(auth()->user()->isStaff())
                     <a href="{{ route('management.payment-transactions.cash-process') }}" 
                        class="flex items-center px-2 py-1.5 text-sm font-medium rounded-lg transition-colors
                               {{ request()->routeIs('management.payment-transactions.cash-process') ? 'bg-indigo-600 text-white' : 'text-gray-300 hover:bg-slate-700 hover:text-white' }}">
@@ -153,7 +155,7 @@
                         </svg>
                         Process Cash Payment
                     </a>
-                    @endunless
+                    @endif
 
                     <!-- Reports & Analytics -->
                     <a href="{{ route('management.reports.index') }}" 
