@@ -58,14 +58,18 @@ RUN mkdir -p storage/framework/cache storage/framework/sessions \
     && chown -R www-data:www-data storage bootstrap/cache public/uploads \
     && chmod -R 775 storage bootstrap/cache public/uploads
 
-# Clear and cache config (with error handling)
-RUN php artisan config:clear || echo "Config clear failed" \
-    && php artisan route:clear || echo "Route clear failed" \
-    && php artisan view:clear || echo "View clear failed" \
-    && php artisan optimize:clear || echo "Optimize clear failed" \
-    && php artisan config:cache || echo "Config cache failed" \
-    && php artisan route:cache || echo "Route cache failed" \
-    && php artisan view:cache || echo "View cache failed"
+
+# Manually wipe any local cache files that snuck in
+RUN rm -rf bootstrap/cache/*.php
+
+# # Clear and cache config (with error handling)
+# RUN php artisan config:clear || echo "Config clear failed" \
+#     && php artisan route:clear || echo "Route clear failed" \
+#     && php artisan view:clear || echo "View clear failed" \
+#     && php artisan optimize:clear || echo "Optimize clear failed" \
+#     && php artisan config:cache || echo "Config cache failed" \
+#     && php artisan route:cache || echo "Route cache failed" \
+#     && php artisan view:cache || echo "View cache failed"
 
 # Create storage symlink
 RUN php artisan storage:link || true

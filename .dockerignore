@@ -1,3 +1,14 @@
-vendor
-node_modules
-.git
+/vendor/
+/node_modules/
+/.git/
+
+# CRITICAL: Do not copy local environments to Render!
+.env
+.env.*
+
+# Ignore locally compiled assets and caches
+/public/build/
+/bootstrap/cache/*.php
+/database/*.sqlite
+/storage/app/public/*
+!/storage/app/public/.gitignore
