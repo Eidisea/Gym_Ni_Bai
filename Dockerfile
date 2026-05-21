@@ -40,17 +40,21 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy composer files first for better caching
-COPY composer.json composer.lock ./
-
-# Install PHP dependencies (without running post-install scripts)
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
-
-# Copy the rest of the application
+# Copy Laravel app
 COPY . .
+
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Install frontend dependencies and build assets
 RUN npm install && npm run build
+
+RUN php artisan config:clear \
+    && php artisan route:clear \
+    && php artisan view:clear
+
+# Create storage symlink
+RUN php artisan storage:link || true
 
 # Fix permissions
 RUN mkdir -p storage/framework/cache storage/framework/sessions \
@@ -58,13 +62,8 @@ RUN mkdir -p storage/framework/cache storage/framework/sessions \
     && chown -R www-data:www-data storage bootstrap/cache public/uploads \
     && chmod -R 775 storage bootstrap/cache public/uploads
 
-# Clear any cached files from local development
-RUN rm -rf bootstrap/cache/*.php
-
-# Generate application key and run migrations
-RUN php artisan key:generate --no-interaction --force \
-    && php artisan migrate --force \
-    && php artisan storage:link
+# (Optional) Run migrations
+RUN php artisan migrate --force || true
 
 # Expose port
 EXPOSE 10000
