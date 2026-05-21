@@ -43,11 +43,20 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy Laravel app
+# Copy composer files first for better caching
+COPY composer.json composer.lock ./
+
+# Install PHP dependencies (without running post-install scripts)
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+
+# Copy the rest of the application
 COPY . .
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Create basic .env file for build (will be overridden by Render environment variables)
+RUN cp .env.example .env
+
+# Generate application key (required for Laravel to work)
+RUN php artisan key:generate --no-interaction
 
 # Install frontend dependencies and build assets
 RUN npm install && npm run build
@@ -58,27 +67,26 @@ RUN mkdir -p storage/framework/cache storage/framework/sessions \
     && chown -R www-data:www-data storage bootstrap/cache public/uploads \
     && chmod -R 775 storage bootstrap/cache public/uploads
 
-
-# Manually wipe any local cache files that snuck in
+# Clear any cached files from local development
 RUN rm -rf bootstrap/cache/*.php
-
-# # Clear and cache config (with error handling)
-# RUN php artisan config:clear || echo "Config clear failed" \
-#     && php artisan route:clear || echo "Route clear failed" \
-#     && php artisan view:clear || echo "View clear failed" \
-#     && php artisan optimize:clear || echo "Optimize clear failed" \
-#     && php artisan config:cache || echo "Config cache failed" \
-#     && php artisan route:cache || echo "Route cache failed" \
-#     && php artisan view:cache || echo "View cache failed"
-
-# Create storage symlink
-RUN php artisan storage:link || true
-
-# # (Optional) Run migrations
-# RUN php artisan migrate --force || true
 
 # Expose port
 EXPOSE 10000
 
-# Start Apache
-CMD ["apache2-foreground"]
+# Create startup script
+RUN echo '#!/bin/bash\n\
+# Clear caches on startup\n\
+php artisan config:clear || true\n\
+php artisan route:clear || true\n\
+php artisan view:clear || true\n\
+php artisan optimize:clear || true\n\
+\n\
+# Create storage symlink if it doesnt exist\n\
+php artisan storage:link || true\n\
+\n\
+# Start Apache\n\
+apache2-foreground' > /usr/local/bin/start.sh \
+    && chmod +x /usr/local/bin/start.sh
+
+# Start with our custom script
+CMD ["/usr/local/bin/start.sh"]
