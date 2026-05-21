@@ -15,8 +15,18 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Providers\AuthServiceProvider::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
-        // ADD THIS LINE TO TRUST RENDER's LOAD BALANCER
+        // Trust all proxies (Cloudflare + Render)
         $middleware->trustProxies(at: '*');
+        
+        // Trust specific proxy headers for Cloudflare + Render
+        $middleware->trustProxies(
+            at: '*',
+            headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR |
+                    \Illuminate\Http\Request::HEADER_X_FORWARDED_HOST |
+                    \Illuminate\Http\Request::HEADER_X_FORWARDED_PORT |
+                    \Illuminate\Http\Request::HEADER_X_FORWARDED_PROTO |
+                    \Illuminate\Http\Request::HEADER_X_FORWARDED_AWS_ELB
+        );
         
         // Redirect guests to management login by default
         $middleware->redirectGuestsTo(fn () => route('management.login'));

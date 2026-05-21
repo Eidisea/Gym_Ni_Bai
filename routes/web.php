@@ -31,6 +31,25 @@ Route::get('/health', function () {
     ]);
 });
 
+// Session debug route
+Route::get('/debug-session', function () {
+    return response()->json([
+        'session_id' => session()->getId(),
+        'csrf_token' => csrf_token(),
+        'session_driver' => config('session.driver'),
+        'session_domain' => config('session.domain'),
+        'session_secure' => config('session.secure'),
+        'app_url' => config('app.url'),
+        'request_secure' => request()->isSecure(),
+        'request_host' => request()->getHost(),
+        'headers' => [
+            'x-forwarded-proto' => request()->header('x-forwarded-proto'),
+            'x-forwarded-host' => request()->header('x-forwarded-host'),
+            'cf-visitor' => request()->header('cf-visitor'),
+        ]
+    ]);
+});
+
 // =============================================================================
 // PUBLIC LANDING PAGE
 // =============================================================================
