@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Providers\AuthServiceProvider::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
+        // ADD THIS LINE TO TRUST RENDER's LOAD BALANCER
+        $middleware->trustProxies(at: '*');
+        
         // Redirect guests to management login by default
         $middleware->redirectGuestsTo(fn () => route('management.login'));
         
