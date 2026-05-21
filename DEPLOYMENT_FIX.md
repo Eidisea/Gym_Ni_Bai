@@ -2,22 +2,28 @@
 
 ## Current Status: Fixed Docker Build Issue
 
-The Docker build was failing with "Class 'env' does not exist" error and then with ".env.example not found". Both issues have been fixed by:
+The Docker build was failing with multiple errors:
+1. "Class 'env' does not exist" error during composer install
+2. ".env.example not found" error due to .dockerignore
+3. "php artisan key:generate" failing during build
+
+All issues have been fixed by:
 1. Installing Composer dependencies without post-install scripts during build
 2. Fixing .dockerignore to allow .env.example file
-3. Adding fallback .env creation if .env.example is missing
-4. Moving cache clearing to runtime instead of build time
-5. Adding a startup script to handle initialization
+3. Moving ALL Laravel initialization (including key generation) to runtime
+4. Creating comprehensive startup script that handles all Laravel setup
+5. Avoiding artisan commands during Docker build entirely
 
 ## Issues Fixed
 
 ### 1. Docker Build Issue Fixed ✅
 - Fixed "Class 'env' does not exist" error during composer install
 - Fixed ".env.example not found" error by updating .dockerignore
-- Added fallback .env creation if .env.example is missing
-- Separated build-time and runtime operations
-- Added proper .env file handling during build
-- Created startup script for runtime initialization
+- Fixed "php artisan key:generate" failing during build
+- Moved ALL Laravel initialization to runtime startup script
+- Separated build-time and runtime operations completely
+- Created comprehensive startup script for runtime initialization
+- Avoided all artisan commands during Docker build
 
 ### 2. Authentication Redirect Issues Fixed ✅
 - Added role-based middleware to customer routes to prevent cross-portal access
@@ -104,11 +110,11 @@ Once authentication is working properly and the `/debug-session` shows correct c
 
 The new Dockerfile and .dockerignore:
 - ✅ Fixed .dockerignore to allow .env.example while excluding other .env files
-- ✅ Added fallback .env creation if .env.example is missing
+- ✅ Completely avoids artisan commands during build (prevents container resolution issues)
 - ✅ Installs Composer dependencies without running problematic post-install scripts
-- ✅ Creates proper .env file during build
-- ✅ Generates application key during build
-- ✅ Moves cache clearing to runtime startup script
+- ✅ Moves ALL Laravel initialization to runtime (key generation, cache clearing, etc.)
+- ✅ Creates comprehensive startup script with proper error handling
+- ✅ Handles .env file creation gracefully at runtime
 - ✅ Handles permissions properly
 - ✅ Uses multi-stage approach for better caching
 

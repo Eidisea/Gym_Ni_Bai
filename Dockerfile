@@ -52,27 +52,6 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-script
 # Copy the rest of the application
 COPY . .
 
-# Create basic .env file for build (will be overridden by Render environment variables)
-RUN if [ -f .env.example ]; then \
-        cp .env.example .env; \
-    else \
-        echo "APP_NAME=Laravel" > .env && \
-        echo "APP_ENV=production" >> .env && \
-        echo "APP_KEY=" >> .env && \
-        echo "APP_DEBUG=false" >> .env && \
-        echo "APP_URL=http://localhost" >> .env && \
-        echo "DB_CONNECTION=mysql" >> .env && \
-        echo "DB_HOST=127.0.0.1" >> .env && \
-        echo "DB_PORT=3306" >> .env && \
-        echo "DB_DATABASE=laravel" >> .env && \
-        echo "DB_USERNAME=root" >> .env && \
-        echo "DB_PASSWORD=" >> .env && \
-        echo "SESSION_DRIVER=database" >> .env; \
-    fi
-
-# Generate application key (required for Laravel to work)
-RUN php artisan key:generate --no-interaction
-
 # Install frontend dependencies and build assets
 RUN npm install && npm run build
 
@@ -88,16 +67,54 @@ RUN rm -rf bootstrap/cache/*.php
 # Expose port
 EXPOSE 10000
 
-# Create startup script
+# Create startup script that handles all Laravel initialization
 RUN echo '#!/bin/bash\n\
-# Clear caches on startup\n\
+set -e\n\
+\n\
+echo "Starting Laravel application initialization..."\n\
+\n\
+# Create .env file if it doesnt exist\n\
+if [ ! -f .env ]; then\n\
+    if [ -f .env.example ]; then\n\
+        echo "Creating .env from .env.example..."\n\
+        cp .env.example .env\n\
+    else\n\
+        echo "Creating basic .env file..."\n\
+        cat > .env << EOF\n\
+APP_NAME=Laravel\n\
+APP_ENV=production\n\
+APP_KEY=\n\
+APP_DEBUG=false\n\
+APP_URL=http://localhost\n\
+DB_CONNECTION=mysql\n\
+DB_HOST=127.0.0.1\n\
+DB_PORT=3306\n\
+DB_DATABASE=laravel\n\
+DB_USERNAME=root\n\
+DB_PASSWORD=\n\
+SESSION_DRIVER=database\n\
+EOF\n\
+    fi\n\
+fi\n\
+\n\
+# Generate application key if not set\n\
+if ! grep -q "APP_KEY=base64:" .env; then\n\
+    echo "Generating application key..."\n\
+    php artisan key:generate --no-interaction --force || echo "Key generation failed, continuing..."\n\
+fi\n\
+\n\
+# Clear caches\n\
+echo "Clearing caches..."\n\
 php artisan config:clear || true\n\
 php artisan route:clear || true\n\
 php artisan view:clear || true\n\
 php artisan optimize:clear || true\n\
 \n\
-# Create storage symlink if it doesnt exist\n\
+# Create storage symlink\n\
+echo "Creating storage symlink..."\n\
 php artisan storage:link || true\n\
+\n\
+echo "Laravel initialization complete. Starting Apache..."\n\
 \n\
 # Start Apache\n\
 apache2-foreground' > /usr/local/bin/start.sh \
