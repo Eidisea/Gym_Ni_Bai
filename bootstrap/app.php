@@ -25,5 +25,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo(fn () => route('management.dashboard'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Log all exceptions for debugging
+        $exceptions->reportable(function (Throwable $e) {
+            \Log::error('Application Exception: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        });
     })->create();

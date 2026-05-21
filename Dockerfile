@@ -18,6 +18,9 @@ RUN apt-get update && apt-get install -y \
 # Enable Apache rewrite
 RUN a2enmod rewrite
 
+# Set ServerName to suppress warnings
+RUN echo "ServerName gym-ni-bai.onrender.com" >> /etc/apache2/apache2.conf
+
 # Make Apache use port 10000 (Render default)
 RUN sed -i 's/Listen 80/Listen 10000/g' /etc/apache2/ports.conf \
     && sed -i 's/<VirtualHost \*:80>/<VirtualHost *:10000>/g' /etc/apache2/sites-available/000-default.conf
@@ -49,21 +52,23 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 # Install frontend dependencies and build assets
 RUN npm install && npm run build
 
-RUN php artisan config:clear \
-    && php artisan route:clear \
-    && php artisan view:clear \
-    && php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
-
-# Create storage symlink
-RUN php artisan storage:link || true
-
 # Fix permissions
 RUN mkdir -p storage/framework/cache storage/framework/sessions \
     storage/framework/views bootstrap/cache public/uploads \
     && chown -R www-data:www-data storage bootstrap/cache public/uploads \
     && chmod -R 775 storage bootstrap/cache public/uploads
+
+# Clear and cache config (with error handling)
+RUN php artisan config:clear || echo "Config clear failed" \
+    && php artisan route:clear || echo "Route clear failed" \
+    && php artisan view:clear || echo "View clear failed" \
+    && php artisan optimize:clear || echo "Optimize clear failed" \
+    && php artisan config:cache || echo "Config cache failed" \
+    && php artisan route:cache || echo "Route cache failed" \
+    && php artisan view:cache || echo "View cache failed"
+
+# Create storage symlink
+RUN php artisan storage:link || true
 
 # # (Optional) Run migrations
 # RUN php artisan migrate --force || true

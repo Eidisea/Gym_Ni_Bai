@@ -21,6 +21,16 @@ use Illuminate\Support\Facades\Route;
 
 Route::aliasMiddleware('role', RoleMiddleware::class);
 
+// Health check route for debugging
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'ok',
+        'app_key' => config('app.key') ? 'set' : 'missing',
+        'database' => 'checking...',
+        'timestamp' => now()
+    ]);
+});
+
 // =============================================================================
 // PUBLIC LANDING PAGE
 // =============================================================================
