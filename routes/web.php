@@ -29,6 +29,16 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+// Test route to debug landing page issues
+Route::get('/test-routes', function () {
+    return response()->json([
+        'customer_login_url' => route('customer.login'),
+        'customer_register_url' => route('customer.register'),
+        'user_authenticated' => auth()->check(),
+        'user_role' => auth()->check() ? auth()->user()->role->role_name : 'guest',
+    ]);
+});
+
 // Default login route - redirect based on context or show selection
 Route::get('/login', function () {
     // If user is already authenticated, redirect to appropriate dashboard
